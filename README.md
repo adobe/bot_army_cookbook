@@ -47,6 +47,7 @@ TODO - try to write each title in a format more like "How do I do X?"
 - example adding users/pools
 - blocking for async results
 - not blocking for async results (`:continue` and `withRetry`)
+- options/defaults as flags vs optional args vs maps vs keyword lists
 
 
 ### Custom Bot
@@ -59,5 +60,6 @@ TODO - try to write each title in a format more like "How do I do X?"
 - beware side-effects
 - random values and run-time vs compile time
 - race conditions when blocking in actions with a second "channel" (use `withRetry`)
+- forgetting to put the arguments in a list
 
 ### Style guide ?
