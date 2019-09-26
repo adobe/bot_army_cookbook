@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>{{ title }}</title>
+    <meta name="description" content="{{ description }}" />
+  </head>
+  <body>
+    <header>
+      <p>
+        <a href="/">Home</a>
+      </p>
+    </header>
+    <h1>{{ title }}</h1>
+    <p>{{ description }}</p>
+
+    {{{ contents }}}
+
+    {{#each collections.posts}}
+    <p>
+      <a href="/{{ path }}">{{ title }}</a>
+    </p>
+    {{/each}}
+
+    <footer>
+      <p>
+        Generated with {{ generator }} &mdash; <a href="{{ url }}">{{ url }}</a>
+      </p>
+    </footer>
+  </body>
+</html>
