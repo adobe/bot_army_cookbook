@@ -1,23 +1,29 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <title>{{ title }}</title>
-  <meta name="description" content="{{ description }}">
-</head>
-<body>
-  <header>
-    <p>
-      <a href="/">Home</a>
-    </p>
+  <head>
+    <meta charset="UTF-8" />
+    <title>{{ title }}</title>
+    <meta name="description" content="{{ description }}" />
+    <script src="http://localhost:35729/livereload.js"></script>
+    <link
+      rel="stylesheet"
+      href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.7.0/styles/atom-one-dark.min.css"
+    />
+  </head>
+  <body>
+    <header>
+      <p>
+        <a href="/">Home</a>
+      </p>
+    </header>
+    <h1>{{ title }}</h1>
+    <time>{{ date }}</time>
+    {{{ contents }}}
 
-  </header>
-  <h1>{{ title }}</h1>
-  <time>{{ date }}</time>
-  {{{ contents }}}
-
-  <footer>
-    <p>Generated with {{ generator }} &mdash; <a href="{{ url }}">{{ url }}</a></p>
-  </footer>
-</body>
+    <footer>
+      <p>
+        Generated with {{ generator }} &mdash; <a href="{{ url }}">{{ url }}</a>
+      </p>
+    </footer>
+  </body>
 </html>
