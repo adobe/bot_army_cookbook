@@ -1,16 +1,25 @@
-# Bot Army Cookbook - Tips, Tricks, and Recipes for Writing Bot Army Trees and Actions
+# Bot Army Cookbook - Tips, Tricks, and Recipes for Writing Bot Army Trees and 
+Actions
 
 ## Intro
 
-Helpful approaches and snippets for working with the [bot army](https://git.corp.adobe.com/pages/manticore/bot_army/readme.html).
+Helpful approaches and snippets for working with the [bot 
+army](https://git.corp.adobe.com/pages/manticore/bot_army/readme.html).
 
-WIP....
+This uses [Metalsmith](metalsmith.io) to build a static site.
+
+## Building
+
+`make build` will install all deps and build the static site into `/docs`.
+
+You can also run `make dev` (after installing the deps with `npm install`) to run a 
+dev server that will host the site, watch the file-system for changes, and live 
+reload your page.  Preview on `http://localhost:8000/`.
 
 ## Notes
 
-Considering creating a metalsmith.io generated static site.
-
-These are mostly tailored to load testing, consider if/how we want to address functional testing patterns.
+These are mostly tailored to load testing, consider if/how we want to address 
+functional testing patterns.
 
 TODO - try to write each title in a format more like "How do I do X?"
 
