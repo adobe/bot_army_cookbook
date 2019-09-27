@@ -2,6 +2,8 @@ var Metalsmith = require("metalsmith");
 var collections = require("metalsmith-collections");
 var markdown = require("metalsmith-markdown");
 var layouts = require("metalsmith-layouts");
+var hbtmd = require("metalsmith-hbt-md");
+var handlebars = require("handlebars");
 var permalinks = require("metalsmith-permalinks");
 var watch = require("metalsmith-watch");
 var serve = require("metalsmith-serve");
@@ -40,6 +42,7 @@ Metalsmith(__dirname)
     )
     .use(metallic())
     .use(collections({ posts: "posts/*.md" }))
+    .use(hbtmd(handlebars))
     .use(markdown())
     .use(permalinks({ relative: false }))
     .use(layouts({ engine: "handlebars" }))

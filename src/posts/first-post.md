@@ -11,3 +11,8 @@ def test(a) do
     a + 1
 end
 ```
+
+
+before
+{{#each collections.posts}} {{title}} {{/each}}
+after
