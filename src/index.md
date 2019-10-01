@@ -1,74 +1,155 @@
 ---
 title: "Bot Army Cookbook"
-layout: listing.html
+layout: listing.hbs
 ---
 
-...use the bot army for testing, (link)
+The "Bot Army" is a tool for testing apps and services with AI-powered "bots."  It 
+can do both load testing and functional/integration testing.
 
-...why bots? (page)
+First steps:
 
-...why behavior trees? (page)
+- [Why bots?](/why-bots) - because they simulate _real_ users
+- You're going to have to know a little [Elixir](https://learnxinyminutes.com/docs/elixir/)
+- Understand how to use [behavior trees](/why-behavior-trees) effectively
+- Review the [full bot army docs](https://git.corp.adobe.com/pages/manticore/bot_army/readme.html)
 
-
-
- ```md
-## Notes/TODO
-
-These are mostly tailored to load testing, consider if/how we want to address 
-functional testing patterns.
-
-(*) try to write each title in a format more like "How do I do X?"
-
-### General concepts and best practices
-
-- what the bots are good at (stateful + "organic")
-- what actions can do
-- keeping actions atomic, yet flexibly parameterized - reuse + doubling as load/functional testing
-- outcomes (when to fail, when to error)
-- working with the context (the bot's "memory")
-- number of bots vs number of actions per second and how to control
-- you're going to be writing some Elixir...
-- Lua scripting option???
-- Logging
-
-
-### Writing Trees section
-
-- power comes from node composition
-- nesting subtrees for reuse and abstraction
-- example auth sequence
-- ways to repeat
-- sharing data between bots (`SharedData`)
-- orchestrating bots working in tandem (partitioning bots actions and waiting for other bots to finish) 
-- "ramping up" bot count (via uniform random wait times)
-- if/then/else samples
-
-
-### Writing Actions section
-
-- relying on context
-- default values
-- atomic atomic atomic!
-- using `with` or `case` and logging and outcomes
-- example adding users/pools
-- blocking for async results
-- not blocking for async results (`:continue` and `withRetry`)
-- options/defaults as flags vs optional args vs maps vs keyword lists
-
-
-### Custom Bot
-
-- when you need it
-- adding a concurrent websockets/long polling "channel"
-
-### Gotchas
-
-- beware side-effects
-- random values and run-time vs compile time
-- race conditions when blocking in actions with a second "channel" (use `withRetry`)
-- forgetting to put the arguments in a list
-
-### Style guide ?
-```
+Here are some useful recipes to with common bot tasks.
 
 ### How do I...?
+
+<!--
+
+----------------
+    TODO
+----------------
+
+### Set up a "bot army" project
+    - tree (load vs integration)
+    - actions
+    - "bootstrap" file
+    - deps
+    - run mix task
+
+### Reuse actions
+    - keeping actions atomic
+    - flexibly parameterized
+    - doubling as load/functional testing
+    - fail vs error
+    - careful about side effects
+
+### Control the number of actions per second
+    - number of bots vs frequency of actions per second
+    - using `wait`
+
+### Reuse subtrees
+    - nesting
+    - reuse
+    - abstraction
+    - parameterizing
+
+### Authenticate a bot
+    - existing username/password pool
+    - choose username
+    - authorize
+    - store token
+
+### Repeat actions
+    - repeat action/tree
+    - repeat-n
+    - repeat-until-fail
+    - repeat-until-succeed
+    - succeed-rate
+    - :continue
+    - with-retry
+
+### Share data between bots
+    - Load test config/metadata
+    - SharedData
+    - create/share/join invite workflow 
+
+### Use different trees for different bots
+    - percentage based using root level random_weighted
+
+### "Ramp up" bot count
+    - via random wait times (uniform)
+
+### Conditionally run actions
+    - via tree stucture and :fail
+    - if/then sample
+    - if/then/else sample
+
+### Set default values
+    - as parameter defaults
+    - as Map/Keyword defaults
+
+### Use random values
+    - in trees
+    - as default function params
+    - beware of compile time random values that don't change
+
+## Parameterize actions
+    - flexibility ftw
+    - flags
+    - optional args
+    - maps/keywords
+
+### Handle errors
+    - case and with syntax
+    - logging
+    - :error vs :fail
+
+### Fetch data from an HTTP endpoint
+    - http libs
+    - http wrapper
+
+### Track current state
+    - ex: current user, pools, current pool
+    - careful to maintain proper sync
+    - all actions need to understand the internal state and deal with missing data
+
+### Wait for async results
+    - blocking vs non blocking implications at bot level
+    - blocking vs async at lib/Elixir level
+    - receive w/ timeout
+
+### Retry an action
+    - loop in tree
+    - :continue (fetch + validation)
+    - timeout/max retries (with_retry)
+
+### Validate expectations
+    - validating data in context
+    - hard code expectations
+    - put expectations in context
+    - use retries
+
+### Wait for another bot to finish an action
+    - wait
+    - SharedData flags + retry
+    - 2nd channel (websocket, etc) + retry
+
+### Use websockets
+    - 2nd channel concept
+    - custom Bot
+    - beware of blocking actions
+
+### Use long-polling
+    - blocking aproach in loop
+    - non blocking (like websockets)
+
+### Read from/ write to the file system
+    - File.*
+    - download via stream to file
+
+
+### Run shell scripts
+    - Cmd.*
+
+
+### Write actions in Lua
+    - ???
+
+### browser testing
+    - Hound
+    - with_retry
+-->

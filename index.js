@@ -55,7 +55,7 @@ Metalsmith(__dirname)
     .use(metallic())
     .use(markdown())
     .use(permalinks({ relative: false }))
-    .use(layouts({ default: "recipe.html", engine: "handlebars" }))
+    .use(layouts({ default: "recipe.hbs", engine: "handlebars" }))
     .build(function(err, files) {
         if (err) {
             throw err;

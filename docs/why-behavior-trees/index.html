@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Why Behavior Trees?</title>
+    <meta name="description" content="It&#x27;s about saying »Hello« to the World." />
+        <script src="http://localhost:35729/livereload.js"></script>
+    <link
+        rel="stylesheet"
+        href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.7.0/styles/atom-one-dark.min.css"
+        />
+  </head>
+  <body>
+    <header>
+      <a href="/">Home</a>
+      <h1>Why Behavior Trees?</h1>
+    </header>
+
+    <p>Simulating real users is hard.  When testing, we want to be able to describe how to
+react to a given situation, without being too rigid.  We&#39;d like to be able to
+describe complex behaviors and conditional sequences in a way that is easy to manage
+and change.</p>
+<p>Behavior trees are the technology that power the non-player-characters&#39; AI in video
+games.  They are similar to finite state machines, but simpler to manage, especially
+as they get more and more complex.</p>
+<p>The secret to their simplicity and power come from 5 fundamentals:</p>
+<ol>
+<li>The data structure is a tree.  This makes it composable, meaning you can build up 
+complex behaviors by nesting smaller subtrees.</li>
+<li>Each node has 2 possible transitions - &quot;fail&quot; or &quot;succeed.&quot;  These are the only 2
+transitions, no matter how many nodes you add.</li>
+<li>Leaf nodes are actions.  Actions can do what ever you want, including reading the
+bot&#39;s state, performing side effects, and updating the bot&#39;s state.  Actions must 
+report if they failed or succeeded.</li>
+<li>Internal nodes are control nodes - they control traversal through the tree.  There 
+are a number of <a href="https://hexdocs.pm/behavior_tree/BehaviorTree.Node.html#content">available control 
+nodes</a>.  The most 
+common ones are &quot;sequence&quot; and &quot;select.&quot;  Sequence nodes will attempt to run each 
+child from left to right.  If each child succeeds, it will succeed.  If a child 
+fails, it will fail.  Select nodes are the inverse - if all children fail, it 
+fails, otherwise it succeeds when one of its children succeeds.  <strong>The power of 
+behavior trees comes from how you nest control nodes.</strong></li>
+<li>The behavior tree&#39;s &quot;active&quot; node is always one of the action (leaf) nodes.  When
+it fails or succeeds, it will traverse to another action, based on the structure
+of the tree.</li>
+</ol>
+<p>A bot has a behavior tree &quot;template&quot; to follow.  It run in a loop where it runs the 
+current action, gets the outcome, traverses to the next action, and repeats.  In the 
+Bot Army, trees and actions are kept separate, bot for organization, but also
+because actions can be reused in different orders in different trees.</p>
+<p>A behavior tree looks like this:</p>
+<pre><code class="hljs elixir"><span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">tree</span></span> <span class="hljs-keyword">do</span>
+  sequence([
+    action(MyActions, <span class="hljs-symbol">:get_ready</span>),
+    action(CommonActions, <span class="hljs-symbol">:wait</span>, [<span class="hljs-number">5</span>]),
+    select([
+      action(MyActions, <span class="hljs-symbol">:try_something</span>, [<span class="hljs-number">42</span>]),
+      action(MyActions, <span class="hljs-symbol">:try_something_else</span>),
+      action(CommonActions, <span class="hljs-symbol">:error</span>, [<span class="hljs-string">"Darn, didn't work!"</span>])
+    ]),
+    MyOtherTree.tree(),
+    action(CommonActions, <span class="hljs-symbol">:done</span>)
+  ])
+<span class="hljs-keyword">end</span></code></pre>
+
+<p>The bot would call these corresponding actions:</p>
+<pre><code class="hljs elixir"><span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">get_ready</span></span>(context) <span class="hljs-keyword">do</span>
+  {<span class="hljs-symbol">id:</span> id} = set_up()
+  {<span class="hljs-symbol">:succeed</span>, <span class="hljs-symbol">id:</span> id} <span class="hljs-comment"># adds `id` to the context for future actions to use</span>
+<span class="hljs-keyword">end</span>
+
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">try_something</span></span>(context, magic_number) <span class="hljs-keyword">do</span>
+  <span class="hljs-keyword">case</span> do_it(context.id, magic_number) <span class="hljs-keyword">do</span>
+    {<span class="hljs-symbol">:ok</span>, <span class="hljs-number">_</span>} -&gt; <span class="hljs-symbol">:succeed</span>
+    {<span class="hljs-symbol">:error</span>, <span class="hljs-number">_</span>} -&gt; <span class="hljs-symbol">:fail</span>
+  <span class="hljs-keyword">end</span>
+<span class="hljs-keyword">end</span>
+
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">try_something_else</span></span>(context), <span class="hljs-symbol">do:</span> ...</code></pre>
+
+<p><a href="https://en.wikipedia.org/wiki/Behavior_tree_(artificial_intelligence,_robotics_and_control)">Read more</a> about behavior trees, or <a href="https://www.youtube.com/watch?v=3sLYzxuKGXI">watch a video</a>.</p>
+
+
+    <footer>
+      <p>
+          Generated with Metalsmith &mdash; <a href="http://www.metalsmith.io/">http://www.metalsmith.io/</a>
+      </p>
+    </footer>
+  </body>
+</html>
