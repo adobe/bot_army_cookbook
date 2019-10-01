@@ -2,43 +2,100 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <title>My Static Site &amp; Blog</title>
+    <title>Bot Army Cookbook</title>
     <meta name="description" content="It&#x27;s about saying »Hello« to the World." />
-    <script src="http://localhost:35729/livereload.js"></script>
+        <script src="http://localhost:35729/livereload.js"></script>
     <link
-      rel="stylesheet"
-      href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.7.0/styles/atom-one-dark.min.css"
-    />
+        rel="stylesheet"
+        href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.7.0/styles/atom-one-dark.min.css"
+        />
   </head>
   <body>
     <header>
-      <p>
-        <a href="/">Home</a>
-      </p>
+      <h1>Bot Army Cookbook</h1>
+      <h2>Tips, Tricks, and Recipes for Building Effective Bots</h2>
     </header>
-    <h1>My Static Site &amp; Blog</h1>
-    <p>It&#x27;s about saying »Hello« to the World.</p>
 
-    <h2>Read what I have to say</h2>
+    <p>...use the bot army for testing, (link)</p>
+<p>...why bots? (page)</p>
+<p>...why behavior trees? (page)</p>
+ <pre><code class="hljs md"><span class="hljs-section">## Notes/TODO</span>
+
+These are mostly tailored to load testing, consider if/how we want to address 
+functional testing patterns.
+
+(*) try to write each title in a format more like "How do I do X?"
+
+<span class="hljs-section">### General concepts and best practices</span>
+<span class="hljs-bullet">
+- </span>what the bots are good at (stateful + "organic")
+<span class="hljs-bullet">- </span>what actions can do
+<span class="hljs-bullet">- </span>keeping actions atomic, yet flexibly parameterized - reuse + doubling as load/functional testing
+<span class="hljs-bullet">- </span>outcomes (when to fail, when to error)
+<span class="hljs-bullet">- </span>working with the context (the bot's "memory")
+<span class="hljs-bullet">- </span>number of bots vs number of actions per second and how to control
+<span class="hljs-bullet">- </span>you're going to be writing some Elixir...
+<span class="hljs-bullet">- </span>Lua scripting option???
+<span class="hljs-bullet">- </span>Logging
 
 
+<span class="hljs-section">### Writing Trees section</span>
+<span class="hljs-bullet">
+- </span>power comes from node composition
+<span class="hljs-bullet">- </span>nesting subtrees for reuse and abstraction
+<span class="hljs-bullet">- </span>example auth sequence
+<span class="hljs-bullet">- </span>ways to repeat
+<span class="hljs-bullet">- </span>sharing data between bots (<span class="hljs-code">`SharedData`</span>)
+<span class="hljs-bullet">- </span>orchestrating bots working in tandem (partitioning bots actions and waiting for other bots to finish) 
+<span class="hljs-bullet">- </span>"ramping up" bot count (via uniform random wait times)
+<span class="hljs-bullet">- </span>if/then/else samples
 
-    <p>
+
+<span class="hljs-section">### Writing Actions section</span>
+<span class="hljs-bullet">
+- </span>relying on context
+<span class="hljs-bullet">- </span>default values
+<span class="hljs-bullet">- </span>atomic atomic atomic!
+<span class="hljs-bullet">- </span>using <span class="hljs-code">`with`</span> or <span class="hljs-code">`case`</span> and logging and outcomes
+<span class="hljs-bullet">- </span>example adding users/pools
+<span class="hljs-bullet">- </span>blocking for async results
+<span class="hljs-bullet">- </span>not blocking for async results (<span class="hljs-code">`:continue`</span> and <span class="hljs-code">`withRetry`</span>)
+<span class="hljs-bullet">- </span>options/defaults as flags vs optional args vs maps vs keyword lists
+
+
+<span class="hljs-section">### Custom Bot</span>
+<span class="hljs-bullet">
+- </span>when you need it
+<span class="hljs-bullet">- </span>adding a concurrent websockets/long polling "channel"
+
+<span class="hljs-section">### Gotchas</span>
+<span class="hljs-bullet">
+- </span>beware side-effects
+<span class="hljs-bullet">- </span>random values and run-time vs compile time
+<span class="hljs-bullet">- </span>race conditions when blocking in actions with a second "channel" (use <span class="hljs-code">`withRetry`</span>)
+<span class="hljs-bullet">- </span>forgetting to put the arguments in a list
+
+<span class="hljs-section">### Style guide ?</span></code></pre>
+
+<h3 id="how-do-i-">How do I...?</h3>
+
+
+    <h4>
       <a href="/posts/first-post">My First Post</a>
-    </p>
-    <p>
+    </h4>
+    <h4>
       <a href="/posts/second-post">My Second Post</a>
-    </p>
-    <p>
+    </h4>
+    <h4>
       <a href="/posts/third-post">My Third Post</a>
-    </p>
-    <p>
+    </h4>
+    <h4>
       <a href="/posts/fourth-post">My Fourth Post</a>
-    </p>
+    </h4>
 
     <footer>
       <p>
-        Generated with Metalsmith &mdash; <a href="http://www.metalsmith.io/">http://www.metalsmith.io/</a>
+          Generated with Metalsmith &mdash; <a href="http://www.metalsmith.io/">http://www.metalsmith.io/</a>
       </p>
     </footer>
   </body>

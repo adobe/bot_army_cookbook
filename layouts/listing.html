@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    {{> common-head}}
+  </head>
+  <body>
+    <header>
+      <h1>Bot Army Cookbook</h1>
+      <h2>Tips, Tricks, and Recipes for Building Effective Bots</h2>
+    </header>
+
+    {{{ contents }}}
+
+    {{#each collections.posts}}
+    <h4>
+      <a href="/{{ path }}">{{ title }}</a>
+    </h4>
+    {{/each}}
+
+    <footer>
+      {{>common-footer}}
+    </footer>
+  </body>
+</html>

@@ -2,6 +2,8 @@ var Metalsmith = require("metalsmith");
 var collections = require("metalsmith-collections");
 var markdown = require("metalsmith-markdown");
 var layouts = require("metalsmith-layouts");
+var partial = require("metalsmith-partial");
+var discoverPartials = require("metalsmith-discover-partials");
 var hbtmd = require("metalsmith-hbt-md");
 var handlebars = require("handlebars");
 var permalinks = require("metalsmith-permalinks");
@@ -34,18 +36,26 @@ Metalsmith(__dirname)
             watch({
                 paths: {
                     "${source}/**/*": true,
-                    "layouts/**/*": "**/*.md"
+                    "layouts/**/*": "**/*.md",
+                    "partials/*": "**/*.md"
                 },
                 livereload: isDev
             })
         )
     )
-    .use(metallic())
     .use(collections({ posts: "posts/*.md" }))
+    .use(discoverPartials())
+    .use(
+        partial({
+            directory: "./partials",
+            engine: "handlebars"
+        })
+    )
     .use(hbtmd(handlebars))
+    .use(metallic())
     .use(markdown())
     .use(permalinks({ relative: false }))
-    .use(layouts({ engine: "handlebars" }))
+    .use(layouts({ default: "recipe.html", engine: "handlebars" }))
     .build(function(err, files) {
         if (err) {
             throw err;
