@@ -27,155 +27,85 @@ can do both load testing and functional/integration testing.</p>
 </ul>
 <p>Here are some useful recipes to with common bot tasks.</p>
 <h3 id="how-do-i-">How do I...?</h3>
-<!--
-
-----------------
-    TODO
-----------------
-
-### Set up a "bot army" project
-    - tree (load vs integration)
-    - actions
-    - "bootstrap" file
-    - deps
-    - run mix task
-
-### Reuse actions
-    - keeping actions atomic
-    - flexibly parameterized
-    - doubling as load/functional testing
-    - fail vs error
-    - careful about side effects
-
-### Control the number of actions per second
-    - number of bots vs frequency of actions per second
-    - using `wait`
-
-### Reuse subtrees
-    - nesting
-    - reuse
-    - abstraction
-    - parameterizing
-
-### Authenticate a bot
-    - existing username/password pool
-    - choose username
-    - authorize
-    - store token
-
-### Repeat actions
-    - repeat action/tree
-    - repeat-n
-    - repeat-until-fail
-    - repeat-until-succeed
-    - succeed-rate
-    - :continue
-    - with-retry
-
-### Share data between bots
-    - Load test config/metadata
-    - SharedData
-    - create/share/join invite workflow 
-
-### Use different trees for different bots
-    - percentage based using root level random_weighted
-
-### "Ramp up" bot count
-    - via random wait times (uniform)
-
-### Conditionally run actions
-    - via tree stucture and :fail
-    - if/then sample
-    - if/then/else sample
-
-### Set default values
-    - as parameter defaults
-    - as Map/Keyword defaults
-
-### Use random values
-    - in trees
-    - as default function params
-    - beware of compile time random values that don't change
-
-## Parameterize actions
-    - flexibility ftw
-    - flags
-    - optional args
-    - maps/keywords
-
-### Handle errors
-    - case and with syntax
-    - logging
-    - :error vs :fail
-
-### Fetch data from an HTTP endpoint
-    - http libs
-    - http wrapper
-
-### Track current state
-    - ex: current user, pools, current pool
-    - careful to maintain proper sync
-    - all actions need to understand the internal state and deal with missing data
-
-### Wait for async results
-    - blocking vs non blocking implications at bot level
-    - blocking vs async at lib/Elixir level
-    - receive w/ timeout
-
-### Retry an action
-    - loop in tree
-    - :continue (fetch + validation)
-    - timeout/max retries (with_retry)
-
-### Validate expectations
-    - validating data in context
-    - hard code expectations
-    - put expectations in context
-    - use retries
-
-### Wait for another bot to finish an action
-    - wait
-    - SharedData flags + retry
-    - 2nd channel (websocket, etc) + retry
-
-### Use websockets
-    - 2nd channel concept
-    - custom Bot
-    - beware of blocking actions
-
-### Use long-polling
-    - blocking aproach in loop
-    - non blocking (like websockets)
-
-### Read from/ write to the file system
-    - File.*
-    - download via stream to file
-
-
-### Run shell scripts
-    - Cmd.*
-
-
-### Write actions in Lua
-    - ???
-
-### browser testing
-    - Hound
-    - with_retry
--->
 
 
     <h4>
-      <a href="/posts/first-post">My First Post</a>
+      <a href="/recipes/authenticate-a-bot">Authenticate a bot</a>
     </h4>
     <h4>
-      <a href="/posts/second-post">My Second Post</a>
+      <a href="/recipes/conditionally-run-actions">Conditionally run actions</a>
     </h4>
     <h4>
-      <a href="/posts/third-post">My Third Post</a>
+      <a href="/recipes/control-the-number-of-actions-per-second">Control the number of actions per second</a>
     </h4>
     <h4>
-      <a href="/posts/fourth-post">My Fourth Post</a>
+      <a href="/recipes/do-browser-testing">Do browser testing</a>
+    </h4>
+    <h4>
+      <a href="/recipes/fetch-data-from-an-http-endpoint">Fetch data from an HTTP endpoint</a>
+    </h4>
+    <h4>
+      <a href="/recipes/handle-errors">Handle errors</a>
+    </h4>
+    <h4>
+      <a href="/recipes/parameterize-actions">Parameterize actions</a>
+    </h4>
+    <h4>
+      <a href="/recipes/ramp-up-bot-count"></a>
+    </h4>
+    <h4>
+      <a href="/recipes/read-and-write-to-the-file-system">Read and write to the file system</a>
+    </h4>
+    <h4>
+      <a href="/recipes/repeat-actions">Repeat actions</a>
+    </h4>
+    <h4>
+      <a href="/recipes/retry-an-action">Retry an action</a>
+    </h4>
+    <h4>
+      <a href="/recipes/reuse-subtrees">Reuse subtrees</a>
+    </h4>
+    <h4>
+      <a href="/recipes/reuse-actions">Reuse actions</a>
+    </h4>
+    <h4>
+      <a href="/recipes/run-shell-scripts">Run shell scripts</a>
+    </h4>
+    <h4>
+      <a href="/recipes/set-default-values">Set default values</a>
+    </h4>
+    <h4>
+      <a href="/recipes/set-up-a-bot-army-project">Set up a &quot;bot army&quot; project</a>
+    </h4>
+    <h4>
+      <a href="/recipes/share-data-between-bots">Share data between bots</a>
+    </h4>
+    <h4>
+      <a href="/recipes/track-current-state">Track current state</a>
+    </h4>
+    <h4>
+      <a href="/recipes/use-different-trees-for-different-bots">Use different trees for different bots</a>
+    </h4>
+    <h4>
+      <a href="/recipes/use-long-polling">Use long-polling</a>
+    </h4>
+    <h4>
+      <a href="/recipes/use-random-values">Use random values</a>
+    </h4>
+    <h4>
+      <a href="/recipes/use-websockets">Use websockets</a>
+    </h4>
+    <h4>
+      <a href="/recipes/validate-expectations">Validate expectations</a>
+    </h4>
+    <h4>
+      <a href="/recipes/wait-for-another-bot-to-finish-an-action">Wait for another bot to finish an action</a>
+    </h4>
+    <h4>
+      <a href="/recipes/wait-for-async-results">Wait for async results</a>
+    </h4>
+    <h4>
+      <a href="/recipes/write-actions-in-lua">Write actions in Lua</a>
     </h4>
 
     <p>
@@ -183,9 +113,7 @@ can do both load testing and functional/integration testing.</p>
     </p>
 
     <footer>
-      <p>
-          Generated with Metalsmith &mdash; <a href="http://www.metalsmith.io/">http://www.metalsmith.io/</a>
-      </p>
+      <p> </p>
     </footer>
   </body>
 </html>

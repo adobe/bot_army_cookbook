@@ -43,7 +43,7 @@ Metalsmith(__dirname)
             })
         )
     )
-    .use(collections({ posts: "posts/*.md" }))
+    .use(collections({ recipes: "recipes/*.md" }))
     .use(discoverPartials())
     .use(
         partial({
