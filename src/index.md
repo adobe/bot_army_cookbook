@@ -6,13 +6,13 @@ layout: listing.hbs
 The "Bot Army" is a tool for testing apps and services with AI-powered "bots."  It 
 can do both load testing and functional/integration testing.
 
-First steps:
+> #### First steps:
+>
+> - [Why bots?](/why-bots) - because they simulate _real_ users
+> - Understand how to use [Behavior Trees](/why-behavior-trees) effectively
+> - You're going to have to know a little [Elixir](https://learnxinyminutes.com/docs/elixir/)
+> - Review the [full docs](https://git.corp.adobe.com/pages/manticore/bot_army/readme.html)
 
-- [Why bots?](/why-bots) - because they simulate _real_ users
-- You're going to have to know a little [Elixir](https://learnxinyminutes.com/docs/elixir/)
-- Understand how to use [behavior trees](/why-behavior-trees) effectively
-- Review the [full bot army docs](https://git.corp.adobe.com/pages/manticore/bot_army/readme.html)
-
-Here are some useful recipes to with common bot tasks.
+Here are some useful recipes for common bot tasks.
 
 ### How do I...?

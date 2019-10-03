@@ -2,6 +2,7 @@
   "name": "static-site-example",
   "private": true,
   "devDependencies": {
+    "autoprefixer": "^9.6.1",
     "handlebars": "^4.0.5",
     "metalsmith": "^2.1.0",
     "metalsmith-collections": "^0.9.0",
@@ -14,6 +15,8 @@
     "metalsmith-partial": "^0.1.0",
     "metalsmith-permalinks": "^0.5.0",
     "metalsmith-serve": "0.0.7",
-    "metalsmith-watch": "^1.0.3"
+    "metalsmith-watch": "^1.0.3",
+    "metalsmith-with-postcss": "^1.1.0",
+    "tailwindcss": "^1.1.2"
   }
 }

@@ -1,0 +1,45 @@
+@tailwind base;
+
+h1 {
+  @apply mb-2 font-display text-6xl italic font-bold text-steelblue text-shadow-lg;
+  @apply border-steelblue border-t-4 border-b-4;
+}
+h2 {
+  @apply mb-1 font-display text-2xl font-bold text-gray-600;
+}
+h3 {
+  @apply font-display text-3xl italic font-bold text-steelblue text-shadow;
+}
+h4 {
+  @apply font-bold text-gray-600;
+}
+a {
+  @apply text-blue-600 underline font-semibold;
+}
+
+li {
+  @apply list-disc list-inside;
+}
+
+p,
+ul {
+  @apply mb-2;
+}
+
+blockquote {
+  @apply px-4 py-3 mb-2 bg-gray-100 border-2 border-gray-300 rounded-lg;
+}
+
+@tailwind components;
+
+@variants hover {
+  .text-shadow-lg {
+    text-shadow: 4px 5px theme("colors.gray.300");
+  }
+
+  .text-shadow {
+    text-shadow: 3px 3px theme("colors.gray.300");
+  }
+}
+
+@tailwind utilities;

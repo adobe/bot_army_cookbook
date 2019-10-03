@@ -3,26 +3,30 @@
   <head>
     {{> common-head}}
   </head>
-  <body>
-    <header>
-      <h1>Bot Army Cookbook</h1>
-      <h2>Tips, Tricks, and Recipes for Building Effective Bots</h2>
-    </header>
+  <body class="text-gray-600">
+    <div class="container mx-auto p-8">
+      <header class="mb-3">
+        <h1>Bot Army Cookbook</h1>
+        <h2>Tips, Tricks, and Recipes for Building Effective Bots</h2>
+      </header>
 
-    {{{ contents }}}
 
-    {{#each collections.recipes}}
-    <h4>
-      <a href="/{{ path }}">{{ title }}</a>
-    </h4>
-    {{/each}}
+      {{{ contents }}}
 
-    <p>
-      Don't see your question? Add an <a href="https://git.corp.adobe.com/manticore/bot_army_cookbook/issues">issue</a>.
-    </p>
+      {{#each collections.recipes}}
+        <h4 class="flex items-center p-2 hover:bg-gray-100 rounded">
+          <i class="fas fa-robot text-steelblue mr-3"></i>
+          <a class="hover:text-shadow-lg font-display text-3xl font-bold text-steelblue text-shadow no-underline" href="/{{ path }}">{{ title }}</a>
+        </h4>
+      {{/each}}
 
-    <footer>
-      {{>common-footer}}
-    </footer>
+      <p class="mt-4">
+        Don't see your question? Add an <a href="https://git.corp.adobe.com/manticore/bot_army_cookbook/issues">issue</a>.
+      </p>
+
+      <footer>
+        {{>common-footer}}
+      </footer>
+    </div>
   </body>
 </html>

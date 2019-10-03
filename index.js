@@ -9,6 +9,7 @@ var handlebars = require("handlebars");
 var permalinks = require("metalsmith-permalinks");
 var watch = require("metalsmith-watch");
 var serve = require("metalsmith-serve");
+var postcss = require("metalsmith-with-postcss");
 var metallic = require("metalsmith-metallic");
 var msIf = require("metalsmith-if");
 
@@ -22,10 +23,9 @@ Metalsmith(__dirname)
     .source("./src")
     .destination("./docs")
     .metadata({
-        title: "My Static Site & Blog",
-        description: "It's about saying »Hello« to the World.",
-        generator: "Metalsmith",
-        url: "http://www.metalsmith.io/",
+        title: "Bot Army Cookbook",
+        description: "Tips, Tricks, and Recipes for Building Effective Bots",
+        url: "https://git.corp.adobe.com/pages/manticore/bot_army_cookbook/",
         isDev: isDev
     })
     .clean(true)
@@ -37,7 +37,8 @@ Metalsmith(__dirname)
                 paths: {
                     "${source}/**/*": true,
                     "layouts/**/*": "**/*.md",
-                    "partials/*": "**/*.md"
+                    "partials/*": "**/*.md",
+                    "public/*": true
                 },
                 livereload: isDev
             })
@@ -53,9 +54,23 @@ Metalsmith(__dirname)
     )
     .use(hbtmd(handlebars))
     .use(metallic())
+    .use(
+        postcss({
+            plugins: {
+                tailwindcss: {},
+                autoprefixer: {}
+            }
+        })
+    )
     .use(markdown())
     .use(permalinks({ relative: false }))
-    .use(layouts({ default: "recipe.hbs", engine: "handlebars" }))
+    .use(
+        layouts({
+            default: "recipe.hbs",
+            pattern: "**/*.html",
+            engine: "handlebars"
+        })
+    )
     .build(function(err, files) {
         if (err) {
             throw err;
