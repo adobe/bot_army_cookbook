@@ -14,7 +14,7 @@ affect what they do.
 
 Bots simulate real users by using the same AI technology that powers 
 non-player-characters in video games.  Specifically, they use [Behavior 
-Trees](/why-behavior-trees).  The benefit of using behavior trees is that they are 
+Trees](../why-behavior-trees).  The benefit of using behavior trees is that they are 
 powerful and flexible enough to describe "organic," reactive behavior, yet fairly 
 simple to write.  They are especially good at allowing you to build up complex 
 behavior by nesting smaller, simpler trees.

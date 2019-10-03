@@ -12,6 +12,7 @@ var serve = require("metalsmith-serve");
 var postcss = require("metalsmith-with-postcss");
 var metallic = require("metalsmith-metallic");
 var msIf = require("metalsmith-if");
+var rootPath = require("metalsmith-rootpath");
 
 const isDev = process.argv.indexOf("--dev") >= 0;
 const port = 8000;
@@ -37,8 +38,7 @@ Metalsmith(__dirname)
                 paths: {
                     "${source}/**/*": true,
                     "layouts/**/*": "**/*.md",
-                    "partials/*": "**/*.md",
-                    "public/*": true
+                    "partials/*": "**/*.md"
                 },
                 livereload: isDev
             })
@@ -64,6 +64,7 @@ Metalsmith(__dirname)
     )
     .use(markdown())
     .use(permalinks({ relative: false }))
+    .use(rootPath())
     .use(
         layouts({
             default: "recipe.hbs",
