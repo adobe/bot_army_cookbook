@@ -1,7 +1,7 @@
 @tailwind base;
 
 h1 {
-  @apply mb-2 font-display text-6xl italic font-bold text-steelblue text-shadow-lg;
+  @apply mb-2 py-4 font-display text-6xl italic font-bold text-steelblue text-shadow-lg leading-none;
   @apply border-steelblue border-t-4 border-b-4;
 }
 h2 {
