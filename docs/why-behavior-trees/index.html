@@ -1,22 +1,24 @@
-<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <title>Why Behavior Trees?</title>
-    <meta name="description" content="Tips, Tricks, and Recipes for Building Effective Bots" />
-        <script src="http://localhost:35729/livereload.js"></script>
-    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.7.0/styles/atom-one-dark.min.css" />
-    <link rel="stylesheet" 
-          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.11.2/css/all.min.css" 
-          />
-    <link rel="stylesheet" href="/styles.css">
-    <link rel="stylesheet" href="https://use.typekit.net/cdl6wid.css">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-  </head>
-  <body>
-    <header>
-      <a href="/">&larr; Bot Army Cookbook</a>
-      <h1>How do I...  Why Behavior Trees??</h1>
+  <!DOCTYPE html>
+  <html lang="en">
+    <head>
+      <meta charset="UTF-8" />
+      <title>Why Behavior Trees?</title>
+      <meta name="description" content="Tips, Tricks, and Recipes for Building Effective Bots" />
+      <script src="http://localhost:35729/livereload.js"></script>
+      <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.7.0/styles/atom-one-dark.min.css" />
+      <link rel="stylesheet" 
+            href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.11.2/css/all.min.css" 
+            />
+      <link rel="stylesheet" href="/styles.css">
+      <link rel="stylesheet" href="https://use.typekit.net/cdl6wid.css">
+      <meta name="viewport" content="width=device-width, initial-scale=1">
+    </head>
+  
+    <body class="text-gray-600">
+      <div class="container mx-auto py-8 px-8 lg:px-32 xl:px-64">
+        <header class="mb-3">
+      <a class="inline-block mb-2 no-underline text-gray-500 hover:text-steelblue" href="/">&larr; Bot Army Cookbook</a>
+      <h1>Why Behavior Trees?</h1>
     </header>
 
     <p>Simulating real users is hard.  When testing, we want to be able to describe how to
@@ -26,31 +28,32 @@ and change.</p>
 <p>Behavior trees are the technology that power the non-player-characters&#39; AI in video
 games.  They are similar to finite state machines, but simpler to manage, especially
 as they get more and more complex.</p>
-<p>The secret to their simplicity and power come from 5 fundamentals:</p>
+<blockquote>
+<h4 id="the-secret-to-their-simplicity-and-power-come-from-5-fundamentals-">The secret to their simplicity and power come from 5 fundamentals:</h4>
 <ol>
-<li>The data structure is a tree.  This makes it composable, meaning you can build up 
+<li><strong>The data structure is a tree.</strong>  This makes it composable, meaning you can build up 
 complex behaviors by nesting smaller subtrees.</li>
-<li>Each node has 2 possible transitions - &quot;fail&quot; or &quot;succeed.&quot;  These are the only 2
+<li><strong>Each node has 2 possible transitions: &quot;fail&quot; or &quot;succeed.&quot;</strong>  These are the only 2
 transitions, no matter how many nodes you add.</li>
-<li>Leaf nodes are actions.  Actions can do what ever you want, including reading the
+<li><strong>Leaf nodes are actions.</strong>  Actions can do what ever you want, including reading the
 bot&#39;s state, performing side effects, and updating the bot&#39;s state.  Actions must 
 report if they failed or succeeded.</li>
-<li>Internal nodes are control nodes - they control traversal through the tree.  There 
+<li><strong>Internal nodes are control nodes</strong> - they control traversal through the tree.  There 
 are a number of <a href="https://hexdocs.pm/behavior_tree/BehaviorTree.Node.html#content">available control 
 nodes</a>.  The most 
 common ones are &quot;sequence&quot; and &quot;select.&quot;  Sequence nodes will attempt to run each 
 child from left to right.  If each child succeeds, it will succeed.  If a child 
 fails, it will fail.  Select nodes are the inverse - if all children fail, it 
-fails, otherwise it succeeds when one of its children succeeds.  <strong>The power of 
-behavior trees comes from how you nest control nodes.</strong></li>
-<li>The behavior tree&#39;s &quot;active&quot; node is always one of the action (leaf) nodes.  When
-it fails or succeeds, it will traverse to another action, based on the structure
-of the tree.</li>
+fails, otherwise it succeeds when one of its children succeeds.</li>
+<li><strong>One leaf node is always &quot;active.&quot;</strong> When it fails or succeeds, the tree will 
+traverse to the next leaf node, based on the structure of the tree.</li>
 </ol>
-<p>A bot has a behavior tree &quot;template&quot; to follow.  It run in a loop where it runs the 
-current action, gets the outcome, traverses to the next action, and repeats.  In the 
-Bot Army, trees and actions are kept separate, bot for organization, but also
-because actions can be reused in different orders in different trees.</p>
+<p><em>The power of behavior trees comes from how you nest control nodes.</em></p>
+</blockquote>
+<p>Each bot has a behavior tree &quot;template&quot; to follow.  It run in a loop where it runs 
+the current action, gets the outcome, traverses to the next action, and repeats.  In 
+the Bot Army, trees and actions are kept separate for organization, but also because 
+actions can be reused in different orders in different trees.</p>
 <p>A behavior tree looks like this:</p>
 <pre><code class="hljs elixir"><span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">tree</span></span> <span class="hljs-keyword">do</span>
   sequence([
@@ -84,8 +87,7 @@ because actions can be reused in different orders in different trees.</p>
 <p><a href="https://en.wikipedia.org/wiki/Behavior_tree_(artificial_intelligence,_robotics_and_control)">Read more</a> about behavior trees, or <a href="https://www.youtube.com/watch?v=3sLYzxuKGXI">watch a video</a>.</p>
 
 
-    <footer>
-      <p> </p>
-    </footer>
-  </body>
-</html>
+        <footer>
+        </footer>
+      </body>
+    </html>

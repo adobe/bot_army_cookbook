@@ -1,18 +1,12 @@
-<!DOCTYPE html>
-<html lang="en">
-  <head>
-    {{> common-head}}
-  </head>
-  <body>
-    <header>
-      <a href="/">&larr; Bot Army Cookbook</a>
+  {{> common-head}}
+      <a class="inline-block mb-2 no-underline text-gray-500 hover:text-steelblue" href="/">&larr; Bot Army Cookbook</a>
+      {{#if collection}}
       <h1>How do I...  {{ title }}?</h1>
+      {{else}}
+      <h1>{{ title }}</h1>
+      {{/if}}
     </header>
 
     {{{ contents }}}
 
-    <footer>
-      {{>common-footer}}
-    </footer>
-  </body>
-</html>
+    {{>common-footer}}
