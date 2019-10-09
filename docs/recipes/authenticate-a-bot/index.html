@@ -19,11 +19,96 @@
       <h1>How do I...  Authenticate a bot?</h1>
     </header>
 
-    <pre><code>- existing username/password pool
-- choose username
-- authorize
-- store token
-</code></pre>
+    <p>Bots can do many things. But much of the time, bots will need to be authenticated to
+do anything meaningful.</p>
+<p>A common question is &quot;What is the relationship between bots and user accounts?&quot;  The 
+answer is that you can set it up how ever you want.  You can have all bots use the 
+same account, or have a new account for every bot.</p>
+<p>How is this done? Of course, it depends on how your services work, but here are some 
+possible approaches.</p>
+<h2 id="creating-users-at-runtime">Creating users at runtime</h2>
+<p>You can create users on the fly and use the same credentials to log in.  This is
+especially useful with integration style tests.</p>
+<pre><code class="hljs elixir"><span class="hljs-comment"># sets some constants to use in all tests (provide your own random string</span>
+<span class="hljs-comment"># implementation)</span>
+<span class="hljs-variable">@username</span> random_string()
+<span class="hljs-variable">@password</span> random_string()
+
+<span class="hljs-comment"># the referenced actions are simple API wrappers (not shown here)</span>
+pre(
+  Node.sequence([
+    action(Misc, <span class="hljs-symbol">:check_health</span>)
+    action(User, <span class="hljs-symbol">:create</span>, [<span class="hljs-variable">@username</span>, <span class="hljs-variable">@password</span>])
+  ])
+)
+
+parallel(
+  <span class="hljs-string">"Test 1..."</span>,
+  Node.sequence([
+    <span class="hljs-comment"># `log_in` should save the username and returned session token in the</span>
+    <span class="hljs-comment"># context for subsequent actions to use</span>
+    action(User, <span class="hljs-symbol">:log_in</span>, [<span class="hljs-variable">@username</span>, <span class="hljs-variable">@password</span>])
+    <span class="hljs-comment"># ...</span>
+  ])
+)
+
+parallel(
+  <span class="hljs-string">"Test 2..."</span>,
+  Node.sequence([
+    action(User, <span class="hljs-symbol">:log_in</span>, [<span class="hljs-variable">@username</span>, <span class="hljs-variable">@password</span>])
+    <span class="hljs-comment"># ...</span>
+  ])
+)
+
+post(
+  Node.sequence([
+    action(User, <span class="hljs-symbol">:delete</span>, [<span class="hljs-variable">@username</span>, <span class="hljs-variable">@password</span>])
+  ])
+)</code></pre>
+
+<h2 id="using-a-pool-of-existing-users">Using a pool of existing users</h2>
+<p>You might not want to create users as part of your test, especially if you are load
+testing and/or you use an external service to authenticate.  In that case you can
+create a pool of user accounts to draw from when logging in.  You probably won&#39;t be
+able to (or want to) make as many user accounts as bots you plan on running, which
+means there will be some &quot;sharing&quot; of accounts.  Think of it as having multiple users
+working on multiple devices at the same time with the same account.</p>
+<pre><code class="hljs elixir"><span class="hljs-comment"># - In User Action -</span>
+
+<span class="hljs-comment"># Step 1: create `num_accounts` accounts in format "bot_test_n@myservice.com"</span>
+<span class="hljs-comment"># (They can all use the same password, or hash their name with a salt, etc)</span>
+
+<span class="hljs-comment"># Step 2: select from this preexisting set of accounts</span>
+
+<span class="hljs-variable">@num_accounts</span> <span class="hljs-number">500</span>
+<span class="hljs-variable">@common_password</span> <span class="hljs-string">"$up3r_$af3"</span>
+
+<span class="hljs-variable">@doc</span> <span class="hljs-string">""</span><span class="hljs-string">"
+Logs in with the provided username, or chooses a random one.
+
+Stores the received token in the context.
+"</span><span class="hljs-string">""</span>
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">log_in</span></span>(
+      context,
+      username \\ <span class="hljs-string">"bot_test_<span class="hljs-subst">#{<span class="hljs-symbol">:rand</span>.uniform(<span class="hljs-variable">@num_accounts</span>)}</span>@myservice.com"</span>
+    ) <span class="hljs-keyword">do</span>
+  Logger.debug(<span class="hljs-keyword">fn</span> -&gt; <span class="hljs-string">"Logging in as <span class="hljs-subst">#{username}</span>"</span> <span class="hljs-keyword">end</span>)
+
+  <span class="hljs-comment"># API wrapper not shown</span>
+  {<span class="hljs-symbol">:ok</span>, token} = APIWrapper.log_in(username, <span class="hljs-variable">@common_password</span>)
+
+  {<span class="hljs-symbol">:succeed</span>, <span class="hljs-symbol">token:</span> token, <span class="hljs-symbol">username:</span> username}
+<span class="hljs-keyword">end</span></code></pre>
+
+<h2 id="authorizing-actions-after-having-logged-in">Authorizing actions after having logged in</h2>
+<p>Usually you receive some kind of session token after authenticating.  You&#39;ll need to
+hold on to this token in the <code>context</code> for subsequent actions to use when making 
+authenticated API calls.</p>
+<p>One last thought - an alternative to having a pool of users is having a pool of
+tokens to draw from. You would need some separate service that took care of logging
+in and obtaining tokens and making them available, but it would let you avoid having
+an authentication step in your tests.</p>
+
 
         <footer>
         </footer>
