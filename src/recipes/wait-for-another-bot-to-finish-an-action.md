@@ -1,5 +1,6 @@
 ---
 title: Wait for another bot to finish an action
+draft: true
 ---
 
     - wait

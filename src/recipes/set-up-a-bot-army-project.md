@@ -1,5 +1,6 @@
 ---
 title: Set up a "bot army" project
+draft: true
 ---
 
     - tree (load vs integration)

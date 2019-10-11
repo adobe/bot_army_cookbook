@@ -1,5 +1,6 @@
 ---
 title: Wait for async results
+draft: true
 ---
 
     - blocking vs non blocking implications at bot level
