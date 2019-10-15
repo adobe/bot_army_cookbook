@@ -19,10 +19,100 @@
       <h1>How do I...  Conditionally run actions?</h1>
     </header>
 
-    <pre><code>- via tree stucture and :fail
-- if/then sample
-- if/then/else sample
-</code></pre>
+    <p>The power of the bots is that they are <em>organic</em>, and can <em>respond</em> to their current
+context. In order to work that way, they require logic operations to choose which
+action to take next. How can you encode logic in the bots?</p>
+<blockquote>
+<p>The number one takeaway is to use the <em>structure of the tree</em>, rather than code
+within the actions, to get organic behavior. Be sure you fully understand
+<a href="../../why-behavior-trees/">how behavior trees work</a>!</p>
+</blockquote>
+<p>Remember that each node in your tree only has two &quot;transitions,&quot; <code>:succeed</code> or
+<code>:fail</code>. You can create complex transitions from one action to another with only
+these two outcomes by the way you <em>nest</em> the <a href="https://hexdocs.pm/behavior_tree/BehaviorTree.Node.html#content">different types of control nodes</a>.</p>
+<p>Here are some examples of common logical structures.</p>
+<h2 id="if-then">If/Then</h2>
+<p>If/then is as simple as using the <code>sequence</code> control node. Each action will only
+occur if the previous one succeeds.</p>
+<pre><code class="hljs elixir"><span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">if_then_tree</span></span>() <span class="hljs-keyword">do</span>
+  Node.sequence([
+    attempt_xyz_tree(),
+    post_xyz_tree()
+  ])
+<span class="hljs-keyword">end</span></code></pre>
+
+<p>Keep in mind that if <em>any</em> of the actions <code>:fail</code>, the whole <code>sequence</code> node will
+<code>:fail</code>. The <code>always_succeed</code> control node is useful if you want to attempt an
+action but don&#39;t want its outcome to affect the <code>sequence</code> it is a part of, like
+this:</p>
+<pre><code class="hljs elixir"><span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">if_then_tree</span></span>() <span class="hljs-keyword">do</span>
+  Node.sequence([
+    attempt_xyz_tree(),
+    Node.always_succeed(post_xyz_tree())
+  ])
+<span class="hljs-keyword">end</span></code></pre>
+
+<p>In this example, the <code>if_then_tree</code> will <code>:succeed</code> as long as <code>attempt_xyz_tree</code>
+succeeds, regardless of the outcome of <code>post_xyz_tree</code>.</p>
+<h2 id="if-else">If/Else</h2>
+<p>If/else is simply the <code>select</code> control node. Each action will be attempted until one
+succeeds. Keep in mind that if <em>all</em> of the actions <code>:fail</code>, the whole <code>select</code>
+node will <code>:fail</code>.</p>
+<pre><code class="hljs elixir"><span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">if_else_tree</span></span>() <span class="hljs-keyword">do</span>
+  Node.select([
+    attempt_xyz_tree(),
+    fallback_to_abc_tree()
+  ])
+<span class="hljs-keyword">end</span></code></pre>
+
+<h2 id="if-then-else">If/Then/Else</h2>
+<p>You can build up more complex logic by combining the two approaches above.</p>
+<pre><code class="hljs elixir"><span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">if_then_else_tree</span></span>() <span class="hljs-keyword">do</span>
+  Node.select([
+    Node.sequence([
+      attempt_xyz_tree(),
+      post_xyz_tree()
+    ]),
+    fallback_to_abc_tree()
+  ])
+<span class="hljs-keyword">end</span></code></pre>
+
+<p>In this example, if <code>attempt_xyz_tree</code> succeeds, <code>post_xyz_tree</code> will run, and
+(assuming that succeeds) <code>if_then_else_tree</code> will succeed. If <code>attempt_xyz_tree</code>
+fails, then <code>fallback_to_abc_tree</code> will run (and <code>if_then_else_tree</code> will fail or
+succeed depending on that outcome).</p>
+<h2 id="keeping-trees-organized">Keeping trees organized</h2>
+<p>You might have noticed in the example above, that the first subtree in the top level
+<code>select</code> is the same
+as <code>if_then_tree</code>.</p>
+<blockquote>
+<p>When nesting trees, it is much easier to keep track of the flow if you name each of
+your subtrees and refer to them by name.</p>
+</blockquote>
+<p>Like this:</p>
+<pre><code class="hljs elixir"><span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">if_then_else_tree</span></span>() <span class="hljs-keyword">do</span>
+  Node.select([
+    if_then_tree(),
+    fallback_to_abc_tree()
+  ])
+<span class="hljs-keyword">end</span></code></pre>
+
+<h2 id="final-thoughts">Final thoughts</h2>
+<p>These approaches will let you build up transitions that are as complex as you need.
+Using the structure of the tree to control the logic has two benefits. First, you
+can mix and match the same actions in very different behaviors without having to
+change any code in the actions. Second, you can make more complex behaviors simply
+by nesting existing trees.</p>
+<p>You may find it helpful to create a few actions that perform a simple check about the
+bot&#39;s current state to use as the &quot;pivot&quot; in your logic branches. For example, an
+action that checks if the bot is logged in:</p>
+<pre><code class="hljs elixir"><span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">is_logged_in?</span></span>(%{<span class="hljs-symbol">token:</span> token}) <span class="hljs-keyword">when</span> is_binary(token), <span class="hljs-symbol">do:</span> <span class="hljs-symbol">:succeed</span>
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">is_logged_in?</span></span>(<span class="hljs-number">_</span>), <span class="hljs-symbol">do:</span> <span class="hljs-symbol">:fail</span></code></pre>
+
+<p>Keep in mind that the <code>always_succeed</code>, <code>always_fail</code> and <code>negate</code> control nodes can
+come in handy. And lastly, avoid unnecessary nesting, such as having a <code>sequence</code> 
+inside another <code>sequence</code>, which wouldn&#39;t have any effect on the logic flow.</p>
+
 
         <footer>
         </footer>
