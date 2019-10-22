@@ -19,7 +19,15 @@
       <h1>How do I...  Repeat actions?</h1>
     </header>
 
-    <pre><code>- repeat action/tree
+    <p>You probably won&#39;t get far in writing a bot before you need some kind of a loop.
+Long-running bots run in a loop by their very nature, and even linear integration
+tests often need to repeat certain actions or sequences. The bot army provides a
+number of ways to build loops and repeat actions.</p>
+<h2 id="when-a-tree-finishes">When a tree &quot;finishes&quot;</h2>
+<p>When a bot gets to the end of its behavior tree, it will start again from the
+beginning. Sometimes you might want this</p>
+<pre><code>- tree loops by default (unless `done`)
+- repeat action/tree
 - repeat-n
 - repeat-until-fail
 - repeat-until-succeed
