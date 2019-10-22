@@ -19,9 +19,54 @@
       <h1>How do I...  Fetch data from an HTTP endpoint?</h1>
     </header>
 
-    <pre><code>- http libs
-- http wrapper
-</code></pre>
+    <p>When writing bots you will probably need to talk to a server over HTTP sooner or later. Elixir/Erlang has several options to do so. Here is an example using a common library set up.</p>
+<h2 id="making-calls-with-httpoison-and-jason">Making calls with <a href="https://hexdocs.pm/httpoison/HTTPoison.html">HTTPoison</a> and <a href="https://hexdocs.pm/jason/readme.html">Jason</a></h2>
+<p><a href="https://hexdocs.pm/httpoison/HTTPoison.html">HTTPoison</a> is a popular elixir HTTP library, and <a href="https://hexdocs.pm/jason/readme.html">Jason</a> is the standard library for encoding and decoding JSON. You can add both to your bot project as dependencies by adding them to the <code>deps</code> section of your <code>mix.ex</code> file:</p>
+<pre><code class="hljs elixir"><span class="hljs-function"><span class="hljs-keyword">defp</span> <span class="hljs-title">deps</span></span> <span class="hljs-keyword">do</span>
+  [
+    {<span class="hljs-symbol">:credo</span>, <span class="hljs-string">"~&gt; 1.1"</span>, <span class="hljs-symbol">only:</span> [<span class="hljs-symbol">:dev</span>, <span class="hljs-symbol">:test</span>]},
+    {<span class="hljs-symbol">:behavior_tree</span>, <span class="hljs-string">"~&gt; 0.3.0"</span>},
+    {<span class="hljs-symbol">:bot_army</span>, <span class="hljs-symbol">path:</span> <span class="hljs-string">"vendor/bot_army/"</span>},
+    {<span class="hljs-symbol">:httpoison</span>, <span class="hljs-string">"~&gt; 1.6"</span>},
+    {<span class="hljs-symbol">:jason</span>, <span class="hljs-string">"~&gt; 1.1"</span>}
+    <span class="hljs-comment"># other deps...</span>
+  ]
+<span class="hljs-keyword">end</span></code></pre>
+
+<p>Requests are straightforward, but read the HTTPoison documentation for full options.</p>
+<p>A <code>GET</code> looks like:</p>
+<pre><code class="hljs elixir">resp = HTTPoison.get!(url)</code></pre>
+
+<p>A <code>POST</code> is similar, but includes an encoded body and headers:</p>
+<pre><code class="hljs elixir">headers = [{<span class="hljs-string">"Content-Type"</span>, <span class="hljs-string">"text/plain"</span>}, {<span class="hljs-string">"charset"</span>, <span class="hljs-string">"utf-8"</span>}]
+body = %{<span class="hljs-symbol">field1:</span> <span class="hljs-string">"value 1"</span>} |&gt; Jason.encode!()
+resp = HTTPoison.post!(url, body, headers)</code></pre>
+
+<h2 id="handling-errors">Handling errors</h2>
+<p>Since requests can fail, you should handle errors. In Elixir you could use a <a href="https://elixirschool.com/en/lessons/basics/control-structures/#case"><code>case</code> statement</a>, but when you have a &quot;chain&quot; of operations that could error, <a href="https://elixirschool.com/en/lessons/basics/control-structures/#with"><code>with</code> statements</a> are very useful. Each line indicates the operation and corresponding expected result. Each result can be used on the lines beneath it, and in the body. If any result does not match the expected result, it will jump to the <code>else</code> section, where you can pattern match the actual value to respond appropriately.</p>
+<p>In this example we &quot;chain&quot; together making a request and decoding the result. Note how we use the non-throwing version of the functions (ie. <code>get</code> instead of <code>get!</code>). Finally we pattern match on the error types that the libraries provide:</p>
+<pre><code class="hljs elixir"><span class="hljs-keyword">with</span> {<span class="hljs-symbol">:ok</span>, %HTTPoison.Response{<span class="hljs-symbol">status_code:</span> <span class="hljs-number">200</span>, <span class="hljs-symbol">body:</span> body}} &lt;- HTTPoison.get(url),
+     {<span class="hljs-symbol">:ok</span>, decoded} &lt;- Jason.decode(body) <span class="hljs-keyword">do</span>
+  Logger.info(inspect(decoded, <span class="hljs-symbol">pretty:</span> <span class="hljs-keyword">true</span>))
+  <span class="hljs-symbol">:succeed</span>
+else
+  {<span class="hljs-symbol">:ok</span>, %HTTPoison.Response{<span class="hljs-symbol">status_code:</span> <span class="hljs-number">404</span>}} -&gt;
+    Logger.error(<span class="hljs-string">"Not found :("</span>)
+    <span class="hljs-symbol">:fail</span>
+
+  {<span class="hljs-symbol">:error</span>, %HTTPoison.Error{<span class="hljs-symbol">reason:</span> reason}} -&gt;
+    Logger.error(inspect(reason))
+    <span class="hljs-symbol">:fail</span>
+
+  {<span class="hljs-symbol">:error</span>, %Jason.DecodeError{} = err} -&gt;
+    Logger.error(inspect(err))
+    <span class="hljs-symbol">:fail</span>
+<span class="hljs-keyword">end</span></code></pre>
+
+<h2 id="making-an-api-wrapper">Making an API wrapper</h2>
+<p>You may find it useful to create a separate file for the API that you are making requests against, that encapsulates the details of each request. Not only is this easier to call in your actions, but you could potentially &quot;swap out&quot; API wrappers based on a runtime config, which can be a powerful technique.</p>
+<p>HTTPoison has an option to help you <a href="https://hexdocs.pm/httpoison/readme.html#wrapping-httpoison-base">create an API wrapper</a> if you are interested.</p>
+
 
         <footer>
         </footer>
