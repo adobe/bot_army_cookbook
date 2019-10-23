@@ -19,11 +19,108 @@
       <h1>How do I...  Parameterize actions?</h1>
     </header>
 
-    <pre><code>- flexibility ftw
-- flags
-- optional args
-- maps/keywords
-</code></pre>
+    <p>Actions are intended to be simple and atomic to maximize reuse. A key factor in
+achieving this is to make them flexible, which means parameterizing how they behave.
+You can design your action&#39;s API in different ways, which will effect how usable they
+are.</p>
+<h2 id="syntax">Syntax</h2>
+<p>Before going into any actual API design, this is how you pass arguments to an action
+in your tree:</p>
+<pre><code class="hljs elixir">action(User, <span class="hljs-symbol">:create</span>, [<span class="hljs-string">"user1"</span>, <span class="hljs-string">"password123"</span>])</code></pre>
+
+<p>Everything in the square brackets will be passed as arguments to the action. So the
+above will become:</p>
+<pre><code class="hljs elixir">User.create(<span class="hljs-string">"user1"</span>, <span class="hljs-string">"password123"</span>)</code></pre>
+
+<p>It might help to point out that when you define actions in your tree, you aren&#39;t
+actually <em>calling</em> them. Rather, you are describing how the bot should call them
+when it gets to that action.</p>
+<p>(In the case of the bots, it actually slips the <code>context</code> in as the first argument
+when calling your action, so your action can use values from there too.)</p>
+<blockquote>
+<p>A word of caution - forgetting the square brackets is an easy mistake to make,
+especially if you only have one parameter or want to pass a list as your parameter.</p>
+</blockquote>
+<pre><code class="hljs elixir">action(User, <span class="hljs-symbol">:update_name</span>, <span class="hljs-string">"new name"</span>)
+<span class="hljs-comment"># ** (ArgumentError) argument error :erlang.apply(...</span>
+
+action(User, <span class="hljs-symbol">:update_name</span>, [<span class="hljs-string">"new name"</span>])
+<span class="hljs-comment"># ok</span></code></pre>
+
+<p>If you ever see an <code>:erlang.apply</code> error, you probably forgot to wrap your
+arguments in brackets.</p>
+<p>Similarly, if you actually want to pass a list as your argument, you need to &quot;double
+wrap&quot; it:</p>
+<pre><code class="hljs elixir">action(User, <span class="hljs-symbol">:set_favorite_foods</span>, [[<span class="hljs-string">"pizza"</span>, <span class="hljs-string">"ice cream"</span>, <span class="hljs-string">"broccoli"</span>]])</code></pre>
+
+<p>To make this more confusing, elixir has a &quot;neat trick&quot; where you can write a keyword
+list literal without the brackets:</p>
+<pre><code class="hljs elixir">IO.inspect(<span class="hljs-symbol">a:</span> <span class="hljs-number">1</span>, <span class="hljs-symbol">b:</span> <span class="hljs-number">2</span>)
+<span class="hljs-comment"># This is only a single argument, not 2!</span>
+<span class="hljs-comment"># It is the same as:</span>
+IO.inspect([<span class="hljs-symbol">a:</span> <span class="hljs-number">1</span>, <span class="hljs-symbol">b:</span> <span class="hljs-number">2</span>])
+<span class="hljs-comment"># which is actually shorthand for [{:a, 1}, {:b, 2}]</span></code></pre>
+
+<p>But if you leave out the brackets when using a keyword list as an argument to your
+action, it won&#39;t work, so you need to be explicit like this:</p>
+<pre><code class="hljs elixir">action(User, <span class="hljs-symbol">:create</span>, [[<span class="hljs-symbol">use_random_name?:</span> <span class="hljs-keyword">true</span>, <span class="hljs-symbol">fail_if_already_exists?:</span> <span class="hljs-keyword">false</span>]])</code></pre>
+
+<p>Now on to designing your action&#39;s API.</p>
+<h2 id="relying-on-the-context">Relying on the <code>context</code></h2>
+<p>As mentioned, every action is called with the bot&#39;s <code>context</code> (or internal state,
+sometimes called a &quot;blackboard&quot; in Behavior Tree terminology). Your action can use
+any value in the context, so you might not need anything else. But in some cases,
+you need to pass in some kind of static configuration.</p>
+<p>You can always add extra parameters to your action if the context isn&#39;t enough. The
+format of the parameters depends on your case.</p>
+<h2 id="specifying-additional-parameters">Specifying additional parameters</h2>
+<p>If you need data for the action to use, you can pass that in however it makes sense,
+often as a map:</p>
+<pre><code class="hljs elixir">action(User, <span class="hljs-symbol">:create</span>, [%{<span class="hljs-symbol">name:</span> <span class="hljs-string">"user1"</span>, <span class="hljs-symbol">password:</span> <span class="hljs-string">"password123"</span>}])</code></pre>
+
+<h2 id="flags-vs-maps-keyword-lists">Flags vs. Maps/Keyword lists</h2>
+<p>What do you think this does?</p>
+<pre><code class="hljs elixir">action(User, <span class="hljs-symbol">:create</span>, [<span class="hljs-keyword">true</span>])</code></pre>
+
+<p>What about this?</p>
+<pre><code class="hljs elixir">action(User, <span class="hljs-symbol">:create</span>, [<span class="hljs-keyword">false</span>, <span class="hljs-keyword">true</span>])</code></pre>
+
+<p>You can&#39;t tell without looking at the action. It also gets more confusing when you
+have multiple flags with default values.</p>
+<pre><code class="hljs elixir"><span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">create</span></span>(context, use_random_name? \\ <span class="hljs-keyword">false</span>, fail_if_already_exists? \\ <span class="hljs-keyword">false</span>) <span class="hljs-keyword">do</span>
+  ...</code></pre>
+
+<p>In general, instead of using flags, you should use either a map or keyword list.
+Keyword lists are more idiomatic, but they don&#39;t prevent duplicate keys, and are
+harder to pattern match against. Also be sure not to forget the brackets as discussed
+above.</p>
+<p>Regardless of which one you use, use <code>Map.get</code> or <code>Keyword.get</code> to access the actual
+values.</p>
+<h2 id="maximum-flexibility">Maximum flexibility</h2>
+<p>Here is an example of how you can rely on optional parameters to make your action
+work in different ways:</p>
+<pre><code class="hljs elixir"><span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">like_post</span></span>(context, post_id \\ <span class="hljs-keyword">nil</span>) <span class="hljs-keyword">do</span>
+  <span class="hljs-keyword">with</span> id <span class="hljs-keyword">when</span> is_binary(id) &lt;-
+         post_id || Map.get(context, <span class="hljs-symbol">:current_post</span>, {<span class="hljs-symbol">:error</span>, <span class="hljs-symbol">:no_post_present</span>})
+    {<span class="hljs-symbol">:ok</span>, <span class="hljs-number">_</span>} &lt;- like_post(id) <span class="hljs-keyword">do</span>
+      <span class="hljs-symbol">:succeed</span>
+    else
+      {<span class="hljs-symbol">:error</span>, <span class="hljs-symbol">:no_post_present</span>} -&gt;
+        Logger.error(<span class="hljs-string">"No post to like"</span>)
+        <span class="hljs-symbol">:fail</span>
+
+      {<span class="hljs-symbol">:error</span>, e} -&gt;
+        Logger.error(inspect(e))
+        <span class="hljs-symbol">:fail</span>
+    <span class="hljs-keyword">end</span>
+<span class="hljs-keyword">end</span></code></pre>
+
+<p>You can use this action in two ways. Either you can supply a post id to like
+explicitly. Or you can use it without an argument as part of a tree that sets
+<code>context.current_post</code> in some previous action.</p>
+<p>This configuration makes this action useful in both load-testing and
+integration-testing trees.</p>
+
 
         <footer>
         </footer>
