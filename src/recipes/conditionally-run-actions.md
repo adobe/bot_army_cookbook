@@ -31,7 +31,7 @@ end
 ```
 
 Keep in mind that if _any_ of the actions `:fail`, the whole `sequence` node will
-`:fail`. The `always_succeed` control node is useful if you want to attempt an
+`:fail`. The [`always_succeed`][3] control node is useful if you want to attempt an
 action but don't want its outcome to affect the `sequence` it is a part of, like
 this:
 
@@ -120,9 +120,12 @@ def is_logged_in?(%{token: token}) when is_binary(token), do: :succeed
 def is_logged_in?(_), do: :fail
 ```
 
-Keep in mind that the `always_succeed`, `always_fail` and `negate` control nodes can
-come in handy. And lastly, avoid unnecessary nesting, such as having a `sequence` 
+Keep in mind that the [`always_succeed`][3], [`always_fail`][4] and [`negate`][5] control nodes can
+come in handy. And lastly, avoid unnecessary nesting, such as having a `sequence`
 inside another `sequence`, which wouldn't have any effect on the logic flow.
 
 [1]: ../../why-behavior-trees/
 [2]: https://hexdocs.pm/behavior_tree/BehaviorTree.Node.html#content
+[3]: https://hexdocs.pm/behavior_tree/BehaviorTree.Node.html#always_succeed/1
+[4]: https://hexdocs.pm/behavior_tree/BehaviorTree.Node.html#always_fail/1
+[5]: https://hexdocs.pm/behavior_tree/BehaviorTree.Node.html#negate/1

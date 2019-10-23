@@ -25,16 +25,105 @@ tests often need to repeat certain actions or sequences. The bot army provides a
 number of ways to build loops and repeat actions.</p>
 <h2 id="when-a-tree-finishes">When a tree &quot;finishes&quot;</h2>
 <p>When a bot gets to the end of its behavior tree, it will start again from the
-beginning. Sometimes you might want this</p>
-<pre><code>- tree loops by default (unless `done`)
-- repeat action/tree
-- repeat-n
-- repeat-until-fail
-- repeat-until-succeed
-- succeed-rate
-- :continue
-- with-retry
-</code></pre>
+beginning. The only way to actually make a bot stop is to have an action return an
+outcome of <code>:done</code> or <code>{:error, reason}</code> (be aware that when running a load test, the
+runner will start a new bot in its place).</p>
+<pre><code class="hljs elixir"><span class="hljs-comment"># alternates logging in and making a post forever</span>
+<span class="hljs-comment"># if either action fails, it will start from the top again</span>
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">tree</span></span> <span class="hljs-keyword">do</span>
+  Node.sequence([
+    log_in(),
+    make_post()
+  ])
+<span class="hljs-keyword">end</span></code></pre>
+
+<p>Sometimes you might want this, but other times you may only want a portion of the
+tree to repeat.</p>
+<h2 id="using-the-repeat_n-node">Using the <code>repeat_n</code> node</h2>
+<p>You can nest any action or subtree under the <a href="https://hexdocs.pm/behavior_tree/BehaviorTree.Node.html#repeat_n/2"><code>repeat_n</code> node</a>, and it will be
+repeated the specified number of times, regardless of its outcome. Note the <a href="https://git.corp.adobe.com/pages/manticore/bot_army/BotArmy.Actions.html#done/1">done
+action</a> to stop the bot.</p>
+<pre><code class="hljs elixir"><span class="hljs-comment"># logs in, then makes 5 posts, then stops</span>
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">tree</span></span> <span class="hljs-keyword">do</span>
+  Node.sequence([
+    log_in(),
+    Node.repeat_n(<span class="hljs-number">5</span>, make_post()),
+    action(BotArmy.Actions, <span class="hljs-symbol">:done</span>)
+  ])
+<span class="hljs-keyword">end</span></code></pre>
+
+<p>This is the most straightforward approach, but sometimes you want to repeat steps
+conditionally (more like a &quot;while loop&quot;).</p>
+<h2 id="using-the-continue-outcome">Using the <code>:continue</code> outcome</h2>
+<p>Bots traverse their behavior trees based on <code>:fail</code> and <code>:succeed</code> node outcomes.
+But there is actually another outcome that tells the behavior tree to stay on the
+same node it is already on: <code>:continue</code>.</p>
+<p>You can make an action repeat simply by returning that. You would probably want to
+put some logic in there to make it eventually return a different outcome, otherwise
+your bot would repeat that action forever.</p>
+<p>While this works fine, it shifts the repeat logic into the action instead of the
+tree, which makes the action less atomic, and thus less flexible and reusable.
+Controlling loops via the tree is generally a better approach, plus you can repeat
+full subtrees instead of a single action.</p>
+<h2 id="conditional-repeats">Conditional repeats</h2>
+<p>The main approach handling repeat logic in the tree is to use one of
+<a href="https://hexdocs.pm/behavior_tree/BehaviorTree.Node.html#repeat_until_fail/1"><code>repeat_until_fail</code></a> or <a href="https://hexdocs.pm/behavior_tree/BehaviorTree.Node.html#repeat_until_succeed/1"><code>repeat_until_succeed</code></a>. These can be a little tricky
+to use, and might require a subtree with some logic in it (see the <a href="../conditionally-run-actions/">conditionally run
+actions</a> recipe), but the basic concept is simple:</p>
+<pre><code class="hljs elixir"><span class="hljs-comment"># logs in, then likes posts until none are left</span>
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">tree</span></span> <span class="hljs-keyword">do</span>
+  Node.sequence([
+    log_in(),
+    Node.repeat_until_fail(
+      Node.sequence([
+        select_next_post(),
+        Node.always_succeed(like_selected_post())
+      ])
+    ),
+    action(BotArmy.Actions, <span class="hljs-symbol">:done</span>)
+  ])
+<span class="hljs-keyword">end</span></code></pre>
+
+<p>Notice how this uses <a href="https://hexdocs.pm/behavior_tree/BehaviorTree.Node.html#always_succeed/1"><code>always_succeed</code></a> to ensure that only <code>select_next_post</code>
+will break the loop.</p>
+<h2 id="limiting-retries">Limiting retries</h2>
+<p>You might have noticed in the previous example that if <code>select_next_post</code> never
+fails, you will be stuck in an infinite loop. Sometimes you don&#39;t know if an action
+will eventually fail (or succeed), especially when you are doing <a href="../validate-expectations">validation style
+actions</a>, so you need a way limit how many times you loop.</p>
+<p>One approach is to store a counter in the bot&#39;s context, and to be sure to increment
+it every time you loop, and also to break the loop if it goes over your limit. Keep
+in mind that actions should be as simple and atomic as possible, so this is a
+slippery slope, but you can encapsulate this retry logic in a helper like this:</p>
+<pre><code class="hljs elixir"><span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">with_max_retries</span></span>(success?, max_retries, context)
+    <span class="hljs-keyword">when</span> is_boolean(success?) <span class="hljs-keyword">and</span>
+         is_integer(max_retries) <span class="hljs-keyword">and</span>
+         max_retries &gt; <span class="hljs-number">0</span> <span class="hljs-keyword">do</span>
+  attempts = Map.get(context, <span class="hljs-symbol">:attempts</span>, max_retries)
+  <span class="hljs-keyword">cond</span> <span class="hljs-keyword">do</span>
+    success? -&gt;
+      {<span class="hljs-symbol">:succeed</span>, <span class="hljs-symbol">attempts:</span> max_retries}
+
+    attempts &gt; <span class="hljs-number">0</span> -&gt;
+      <span class="hljs-comment"># optional, give some time before trying again</span>
+      Process.sleep(<span class="hljs-number">500</span>)
+      {<span class="hljs-symbol">:continue</span>, <span class="hljs-symbol">attempts:</span> attempts - <span class="hljs-number">1</span>}
+
+    <span class="hljs-symbol">:else</span> -&gt;
+      {<span class="hljs-symbol">:fail</span>, <span class="hljs-symbol">attempts:</span> max_retries}
+  <span class="hljs-keyword">end</span>
+<span class="hljs-keyword">end</span></code></pre>
+
+<p>You can use it in your actions by giving it a boolean condition and letting it decide
+what outcome to return:</p>
+<pre><code class="hljs elixir"><span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">validate_has_n_posts</span></span>(context, expected_num) <span class="hljs-keyword">do</span>
+  post_count = get_posts() |&gt; Enum.count()
+
+  (post_count == expected_num)
+  |&gt; with_max_retries(<span class="hljs-number">5</span>, context)
+<span class="hljs-keyword">end</span></code></pre>
+
+
 
         <footer>
         </footer>

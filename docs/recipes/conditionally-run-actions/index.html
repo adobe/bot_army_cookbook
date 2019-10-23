@@ -42,7 +42,7 @@ occur if the previous one succeeds.</p>
 <span class="hljs-keyword">end</span></code></pre>
 
 <p>Keep in mind that if <em>any</em> of the actions <code>:fail</code>, the whole <code>sequence</code> node will
-<code>:fail</code>. The <code>always_succeed</code> control node is useful if you want to attempt an
+<code>:fail</code>. The <a href="https://hexdocs.pm/behavior_tree/BehaviorTree.Node.html#always_succeed/1"><code>always_succeed</code></a> control node is useful if you want to attempt an
 action but don&#39;t want its outcome to affect the <code>sequence</code> it is a part of, like
 this:</p>
 <pre><code class="hljs elixir"><span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">if_then_tree</span></span>() <span class="hljs-keyword">do</span>
@@ -109,8 +109,8 @@ action that checks if the bot is logged in:</p>
 <pre><code class="hljs elixir"><span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">is_logged_in?</span></span>(%{<span class="hljs-symbol">token:</span> token}) <span class="hljs-keyword">when</span> is_binary(token), <span class="hljs-symbol">do:</span> <span class="hljs-symbol">:succeed</span>
 <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">is_logged_in?</span></span>(<span class="hljs-number">_</span>), <span class="hljs-symbol">do:</span> <span class="hljs-symbol">:fail</span></code></pre>
 
-<p>Keep in mind that the <code>always_succeed</code>, <code>always_fail</code> and <code>negate</code> control nodes can
-come in handy. And lastly, avoid unnecessary nesting, such as having a <code>sequence</code> 
+<p>Keep in mind that the <a href="https://hexdocs.pm/behavior_tree/BehaviorTree.Node.html#always_succeed/1"><code>always_succeed</code></a>, <a href="https://hexdocs.pm/behavior_tree/BehaviorTree.Node.html#always_fail/1"><code>always_fail</code></a> and <a href="https://hexdocs.pm/behavior_tree/BehaviorTree.Node.html#negate/1"><code>negate</code></a> control nodes can
+come in handy. And lastly, avoid unnecessary nesting, such as having a <code>sequence</code>
 inside another <code>sequence</code>, which wouldn&#39;t have any effect on the logic flow.</p>
 
 
