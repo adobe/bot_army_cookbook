@@ -19,11 +19,45 @@
       <h1>How do I...  Reuse subtrees?</h1>
     </header>
 
-    <pre><code>- nesting
-- reuse
-- abstraction
-- parameterizing
-</code></pre>
+    <p>One of the most powerful features of Behavior Trees is that you can build up lots of
+smaller simpler trees and <em>compose</em> them together into larger, more complex ones.</p>
+<p>How does this work in Elixir? It is pretty simple:</p>
+<pre><code class="hljs elixir"><span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">auth</span></span> <span class="hljs-keyword">do</span>
+  Node.sequence([
+    action(User, <span class="hljs-symbol">:choose_from_pool</span>),
+    action(User, <span class="hljs-symbol">:log_in_current_user</span>)
+  ])
+<span class="hljs-keyword">end</span>
+
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">read_posts</span></span>(n, category) <span class="hljs-keyword">do</span>
+  Node.sequence([
+    Node.repeat(
+      n,
+      action(Post, <span class="hljs-symbol">:fetch</span>, [[<span class="hljs-symbol">category:</span> category]])
+    )
+  ])
+<span class="hljs-keyword">end</span>
+
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">write_post</span></span> <span class="hljs-keyword">do</span> ...
+
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">tree</span></span> <span class="hljs-keyword">do</span>
+  Node.sequence([
+    auth(),
+    Node.random([
+      read_posts(<span class="hljs-number">5</span>, <span class="hljs-string">"elixir"</span>),
+      write_post(),
+      <span class="hljs-comment"># etc...</span>
+    ])
+  ])
+<span class="hljs-keyword">end</span></code></pre>
+
+<p>Each tree is defined, and can be used by other trees. This helps with organization,
+but also lets you use the same subtree in multiple places in a larger tree, and can
+also make complex trees much easier to see what they are doing.</p>
+<p>Because each tree is defined as a normal Elixir function, you can have it define
+parameters which it can pass down into its actions, allowing you to parameterize
+whole subtrees.</p>
+
 
         <footer>
         </footer>
