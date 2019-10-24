@@ -11,8 +11,10 @@ number of ways to build loops and repeat actions.
 
 When a bot gets to the end of its behavior tree, it will start again from the
 beginning. The only way to actually make a bot stop is to have an action return an
-outcome of `:done` or `{:error, reason}` (be aware that when running a load test, the
-runner will start a new bot in its place).
+outcome of `:done` or `{:error, reason}`. Be aware that when running a load test, the
+runner will start a new bot in its place. Also note that the integration test runner
+automatically wraps your trees with a "done" action after it to prevent them from
+repeating.
 
 ```elixir
 # alternates logging in and making a post forever

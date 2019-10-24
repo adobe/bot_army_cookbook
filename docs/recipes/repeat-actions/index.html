@@ -26,8 +26,10 @@ number of ways to build loops and repeat actions.</p>
 <h2 id="when-a-tree-finishes">When a tree &quot;finishes&quot;</h2>
 <p>When a bot gets to the end of its behavior tree, it will start again from the
 beginning. The only way to actually make a bot stop is to have an action return an
-outcome of <code>:done</code> or <code>{:error, reason}</code> (be aware that when running a load test, the
-runner will start a new bot in its place).</p>
+outcome of <code>:done</code> or <code>{:error, reason}</code>. Be aware that when running a load test, the
+runner will start a new bot in its place. Also note that the integration test runner
+automatically wraps your trees with a &quot;done&quot; action after it to prevent them from
+repeating.</p>
 <pre><code class="hljs elixir"><span class="hljs-comment"># alternates logging in and making a post forever</span>
 <span class="hljs-comment"># if either action fails, it will start from the top again</span>
 <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">tree</span></span> <span class="hljs-keyword">do</span>
