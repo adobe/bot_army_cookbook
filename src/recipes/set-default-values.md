@@ -58,7 +58,7 @@ end
 
 ```
 
-There's a log going on here, so let's unpack it.
+There's a lot going on here, so let's unpack it.
 
 First, if you define a function that has default values and multiple clauses, you
 need to make a "function header" which specifies the defaults but has no body. You
