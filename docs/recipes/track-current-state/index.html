@@ -19,10 +19,36 @@
       <h1>How do I...  Track current state?</h1>
     </header>
 
-    <pre><code>- ex: current user, pools, current pool
-- careful to maintain proper sync
-- all actions need to understand the internal state and deal with missing data (example of `like_post(context, post \\ nil)` that falls back to `context.selected_post`
-</code></pre>
+    <p>Each bot has a <code>context</code> or current state (also called a &quot;blackboard&quot; in Behavior
+Trees parlance). This context is available as the first parameter to every action,
+and actions can return data they want to merge into the context.</p>
+<p>You can use this state how ever you want, and it is the only way to pass data between
+actions. The only caveat is to make sure that any data you expect to find in the
+context will actually be there from a previous action. You can keep your actions
+atomic by separating operations across actions and passing data forward in each step.
+For example:</p>
+<pre><code class="hljs elixir"><span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">tree</span></span> <span class="hljs-keyword">do</span>
+  Node.sequence([
+    <span class="hljs-comment"># sets `context.token` for other actions to use to authenticate</span>
+    action(User, <span class="hljs-symbol">:log_in</span>),
+    <span class="hljs-comment"># sets `context.albums` list</span>
+    action(Albums, <span class="hljs-symbol">:fetch</span>),
+    <span class="hljs-comment"># chooses an album from `context.albums` and sets `context.current_album`</span>
+    action(Albums, <span class="hljs-symbol">:select</span>, [[<span class="hljs-symbol">random:</span> <span class="hljs-keyword">true</span>]]),
+    <span class="hljs-comment"># updates the album with the id from `context.current_album`</span>
+    action(Albums, <span class="hljs-symbol">:update_name</span>, [<span class="hljs-string">"new name"</span>])
+  ])
+<span class="hljs-keyword">end</span></code></pre>
+
+<p>This works well, but it does mean you have to know what is in your context, which
+adds cognitive load, and isn&#39;t very visible. It also means your actions should deal
+with missing information appropriately. Perhaps this means failing or erroring, or
+perhaps your actions have a fallback value to use. Make sure to use
+<code>Map.get(context, :my_key, my_fallback)</code> if you want to avoid unexpected &quot;key not
+found&quot; errors. You could also pattern match, like this:</p>
+<pre><code class="hljs elixir"><span class="hljs-comment"># In Actions.Albums</span>
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">select</span></span>(%{<span class="hljs-symbol">albums:</span> albums} = context, opts) <span class="hljs-keyword">when</span> is_list(albums), <span class="hljs-symbol">do:</span> ...
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">select</span></span>(<span class="hljs-number">_</span>), <span class="hljs-symbol">do:</span> <span class="hljs-symbol">:fail</span></code></pre>
 
         <footer>
         </footer>
