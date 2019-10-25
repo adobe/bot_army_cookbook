@@ -38,7 +38,7 @@ Metalsmith(__dirname)
             isDev,
             watch({
                 paths: {
-                    "${source}/**/*": true,
+                    "${source}/**/*": "**/*.md",
                     "${source}/scripts.js": "**/*.md",
                     "layouts/**/*": "**/*.md",
                     "partials/*": "**/*.md"
