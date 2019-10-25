@@ -6,27 +6,44 @@
 
       {{{ contents }}}
 
-      {{#each collections.recipes}}
-        {{#unless this.draft }}
-        <h4 class="flex items-center p-2 hover:bg-gray-100 rounded">
-          <i class="fas fa-robot text-steelblue mr-3"></i>
-          <a class="hover:text-shadow-lg hover:no-underline font-display text-3xl font-bold text-steelblue text-shadow no-underline" href="{{ path }}">{{ title }}</a>
-        </h4>
-        {{/unless}}
-      {{/each}}
 
-      <h3 class="mt-16 opacity-75">(In progress...)</h3>
-      {{#each collections.recipes}}
-        {{#if this.draft }}
-        <h4 class="flex items-center p-2 hover:bg-gray-100 rounded opacity-75">
-          <i class="fas fa-robot text-steelblue mr-3"></i>
-          <a class="hover:text-shadow-lg hover:no-underline font-display text-3xl font-bold text-steelblue text-shadow no-underline" href="{{ path }}">{{ title }}</a>
-        </h4>
-        {{/if}}
-      {{/each}}
+      <input id="search_input" type="text" placeholder="Search..."></input>
+
+      <div id="search" class="hidden">
+        <b id="searching_indicator">No matches found...</b>
+        <div id="search_results"></div>
+      </div>
+
+      <div id="recipes">
+        {{#each collections.recipes}}
+          {{#unless this.draft }}
+          <h4 class="flex items-center p-2 hover:bg-gray-100 rounded">
+            <i class="fas fa-robot text-steelblue mr-3"></i>
+            <a class="hover:text-shadow-lg hover:no-underline font-display text-3xl font-bold text-steelblue text-shadow no-underline" href="{{ path }}">{{ title }}</a>
+          </h4>
+          {{/unless}}
+        {{/each}}
+
+        <h3 class="mt-16 opacity-75">(In progress...)</h3>
+        {{#each collections.recipes}}
+          {{#if this.draft }}
+          <h4 class="flex items-center p-2 hover:bg-gray-100 rounded opacity-75">
+            <i class="fas fa-robot text-steelblue mr-3"></i>
+            <a class="hover:text-shadow-lg hover:no-underline font-display text-3xl font-bold text-steelblue text-shadow no-underline" href="{{ path }}">{{ title }}</a>
+          </h4>
+          {{/if}}
+        {{/each}}
+      </div>
 
       <p class="mt-4">
         Don't see your question? Add an <a href="https://git.corp.adobe.com/manticore/bot_army_cookbook/issues">issue</a>.
       </p>
+
+      <script>
+        window.recipes = {}
+        {{#each collections.recipes}}
+        window.recipes["{{{path}}}/index.html"] = "{{title}}";
+        {{/each}}
+      </script>
 
       {{>common-footer}}

@@ -1,5 +1,6 @@
 var Metalsmith = require("metalsmith");
 var collections = require("metalsmith-collections");
+var metadata = require("metalsmith-collection-metadata");
 var markdown = require("metalsmith-markdown");
 var layouts = require("metalsmith-layouts");
 var partial = require("metalsmith-partial");
@@ -13,6 +14,7 @@ var postcss = require("metalsmith-with-postcss");
 var metallic = require("metalsmith-metallic");
 var msIf = require("metalsmith-if");
 var rootPath = require("metalsmith-rootpath");
+var lunr = require("metalsmith-lunr");
 
 const isDev = process.argv.indexOf("--dev") >= 0;
 const port = 8000;
@@ -37,6 +39,7 @@ Metalsmith(__dirname)
             watch({
                 paths: {
                     "${source}/**/*": true,
+                    "${source}/scripts.js": "**/*.md",
                     "layouts/**/*": "**/*.md",
                     "partials/*": "**/*.md"
                 },
@@ -45,6 +48,13 @@ Metalsmith(__dirname)
         )
     )
     .use(collections({ recipes: "recipes/*.md" }))
+    .use(
+        metadata({
+            "collections.recipes": {
+                lunr: true
+            }
+        })
+    )
     .use(discoverPartials())
     .use(
         partial({
@@ -65,6 +75,14 @@ Metalsmith(__dirname)
     .use(markdown())
     .use(permalinks({ relative: false }))
     .use(rootPath())
+    .use(
+        lunr({
+            fields: {
+                title: 2,
+                contents: 1
+            }
+        })
+    )
     .use(
         layouts({
             default: "recipe.hbs",

@@ -36,11 +36,25 @@ ol {
 }
 
 blockquote {
-  @apply px-4 py-3 my-4 bg-gray-100 border-2 border-gray-300 rounded-lg;
+  @apply px-4 py-3 my-4 bg-gray-100 border border-gray-400 rounded-lg;
 }
 
 code {
-  @apply mb-4 px-1 border-2 border-solid border-gray-100 rounded;
+  @apply mb-4 px-1 border border-solid border-gray-400 rounded;
+}
+
+input {
+  @apply my-2 p-2 w-full border border-gray-400 rounded;
+}
+
+input:focus {
+  @apply outline-none border-steelblue;
+}
+
+/* Container "locked" to measured initial full height to prevent page jump when
+ * searching and reciple list goes away */
+#content {
+  min-height: 2400px;
 }
 
 @tailwind components;
