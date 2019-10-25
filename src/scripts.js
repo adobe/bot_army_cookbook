@@ -5,8 +5,7 @@ const searchingIndicatorEl = document.getElementById("searching_indicator");
 const searchResultsEl = document.getElementById("search_results");
 
 // get lunr search index
-const root = location.origin;
-fetch(`${root}/searchIndex.json`)
+fetch(`${window.rootPath}searchIndex.json`)
     .then(res => res.json())
     .then(index => {
         const idx = window.lunr.Index.load(index);

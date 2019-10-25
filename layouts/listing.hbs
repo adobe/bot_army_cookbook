@@ -40,10 +40,12 @@
       </p>
 
       <script>
-        window.recipes = {}
+        window.rootPath = "{{rootPath}}";
+        window.recipes = {};
         {{#each collections.recipes}}
         window.recipes["{{{path}}}/index.html"] = "{{title}}";
         {{/each}}
       </script>
+      <script src="{{rootPath}}scripts.js"></script>
 
       {{>common-footer}}
