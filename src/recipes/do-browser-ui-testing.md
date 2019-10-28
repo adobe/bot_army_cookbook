@@ -1,5 +1,5 @@
 ---
-title: Do browser testing
+title: Do browser UI testing
 draft: true
 ---
 

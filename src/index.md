@@ -1,5 +1,5 @@
 ---
-title: "Bot Army Cookbook"
+title: Recipes for building your bots
 layout: listing.hbs
 ---
 
