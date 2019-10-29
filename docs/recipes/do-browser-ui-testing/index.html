@@ -20,9 +20,37 @@
       <h1>How do I...  Do browser UI testing?</h1>
     </header>
 
-    <pre><code>- Hound
-- with_retry
-</code></pre>
+    <p>Can the bots use a browser? Yes they can. It&#39;s pretty simple actually, you just need
+to use <a href="https://hexdocs.pm/hound/readme.html">Hound</a>, an Elixir browser automation library, in your actions. In that way,
+it&#39;s not much different from using an HTTP library. In fact, you could create both an
+HTTP adapter, and a Hound adapter with the same API for your actions to call, and
+switch them out at runtime as needed. In other words, you can use the same bot trees
+and actions to run both API level tests and browser UI tests!</p>
+<p>Getting set up is super easy - I&#39;ve created a <a href="https://git.corp.adobe.com/schomay/bot_army_ui_testing_demo">UI testing demo</a> repository with
+full instructions and examples that you can just clone and modify as needed. Be sure
+to read the Hound docs.</p>
+<p>UI testing is notoriously flakey. You can mitigate problems if you are disciplined.
+Here are a few tips:</p>
+<ul>
+<li>Be mindful of what you use as selectors. <code>:text</code> is simple and closest to what the
+user will actually see, but if it changes (or you try to run your tests on a
+different internationalization language) your tests will break. <code>:class</code>es are a
+bad choice because they too can change, just like <code>:tag</code>s. <code>:id</code>s or <code>:name</code>s are
+better.</li>
+<li>Clear separation of layers goes a long way. Luckily, the bots are already set up
+in clear layers: the tree describes the test, the actions perform the work, and if
+you&#39;ve set up an adapter as suggested, that has the implementation specific calls.</li>
+<li>Just like actions, being atomic is a very good practice in your adapter&#39;s API. For
+a complex page, creating a <a href="https://github.com/samueljseay/page_object">page object</a> is very useful.</li>
+<li>The hard part about browser testing is that sometimes elements haven&#39;t loaded yet
+when you try to test for them. Hound has a built-in retry system for most actions
+that involve inspecting the DOM. But some actions, like checking the page&#39;s title
+do not have built-in retries, and you might sometimes need them. See the
+<a href="https://git.corp.adobe.com/schomay/bot_army_ui_testing_demo/blob/master/lib/actions/cookbook.ex#L117">retry_with_timeout</a> example in the demo repo&#39;s actions for a simple generic
+retry implementation.</li>
+</ul>
+<p>Happy automating!</p>
+
 
         <footer>
         </footer>
