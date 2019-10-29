@@ -1,5 +1,6 @@
 ---
 title: Repeat actions
+level: intermediate
 ---
 
 You probably won't get far in writing a bot before you need some kind of a loop.

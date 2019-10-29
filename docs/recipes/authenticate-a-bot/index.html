@@ -22,13 +22,13 @@
 
     <p>Bots can do many things. But much of the time, bots will need to be authenticated to
 do anything meaningful.</p>
-<p>A common question is &quot;What is the relationship between bots and user accounts?&quot;  The 
-answer is that you can set it up how ever you want.  You can have all bots use the 
+<p>A common question is &quot;What is the relationship between bots and user accounts?&quot; The
+answer is that you can set it up how ever you want. You can have all bots use the
 same account, or have a new account for every bot.</p>
-<p>How is this done? Of course, it depends on how your services work, but here are some 
+<p>How is this done? Of course, it depends on how your services work, but here are some
 possible approaches.</p>
 <h2 id="creating-users-at-runtime">Creating users at runtime</h2>
-<p>You can create users on the fly and use the same credentials to log in.  This is
+<p>You can create users on the fly and use the same credentials to log in. This is
 especially useful with integration style tests.</p>
 <pre><code class="hljs elixir"><span class="hljs-comment"># sets some constants to use in all tests (provide your own random string</span>
 <span class="hljs-comment"># implementation)</span>
@@ -69,10 +69,10 @@ post(
 
 <h2 id="using-a-pool-of-existing-users">Using a pool of existing users</h2>
 <p>You might not want to create users as part of your test, especially if you are load
-testing and/or you use an external service to authenticate.  In that case you can
-create a pool of user accounts to draw from when logging in.  You probably won&#39;t be
+testing and/or you use an external service to authenticate. In that case you can
+create a pool of user accounts to draw from when logging in. You probably won&#39;t be
 able to (or want to) make as many user accounts as bots you plan on running, which
-means there will be some &quot;sharing&quot; of accounts.  Think of it as having multiple users
+means there will be some &quot;sharing&quot; of accounts. Think of it as having multiple users
 working on multiple devices at the same time with the same account.</p>
 <pre><code class="hljs elixir"><span class="hljs-comment"># - In User Action -</span>
 
@@ -102,8 +102,8 @@ Stores the received token in the context.
 <span class="hljs-keyword">end</span></code></pre>
 
 <h2 id="authorizing-actions-after-having-logged-in">Authorizing actions after having logged in</h2>
-<p>Usually you receive some kind of session token after authenticating.  You&#39;ll need to
-hold on to this token in the <code>context</code> for subsequent actions to use when making 
+<p>Usually you receive some kind of session token after authenticating. You&#39;ll need to
+hold on to this token in the <code>context</code> for subsequent actions to use when making
 authenticated API calls.</p>
 <p>One last thought - an alternative to having a pool of users is having a pool of
 tokens to draw from. You would need some separate service that took care of logging

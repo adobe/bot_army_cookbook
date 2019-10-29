@@ -1,5 +1,6 @@
 ---
 title: Control the number of actions per second
+level: basic
 ---
 
 When load testing, obviously the goal is to generate lots and lots of traffic. You

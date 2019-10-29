@@ -1,5 +1,6 @@
 ---
 title: Use websockets
+level: advanced
 draft: true
 ---
 

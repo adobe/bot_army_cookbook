@@ -1,5 +1,6 @@
 ---
 title: Fetch data from an HTTP endpoint
+level: intermediate
 ---
 
 When writing bots you will probably need to talk to a server over HTTP sooner or

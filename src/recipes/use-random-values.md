@@ -1,5 +1,6 @@
 ---
 title: Use random values
+level: intermediate
 draft: true
 ---
 

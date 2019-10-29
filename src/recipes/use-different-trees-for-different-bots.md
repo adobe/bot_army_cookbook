@@ -1,5 +1,6 @@
 ---
 title: Use different trees for different bots
+level: intermediate
 draft: true
 ---
 

@@ -1,5 +1,6 @@
 ---
 title: Handle errors
+level: basic
 draft: true
 ---
 

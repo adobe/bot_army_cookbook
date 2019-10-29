@@ -1,21 +1,21 @@
 ---
 title: Authenticate a bot
+level: intermediate
 ---
 
 Bots can do many things. But much of the time, bots will need to be authenticated to
 do anything meaningful.
 
-A common question is "What is the relationship between bots and user accounts?"  The 
-answer is that you can set it up how ever you want.  You can have all bots use the 
+A common question is "What is the relationship between bots and user accounts?" The
+answer is that you can set it up how ever you want. You can have all bots use the
 same account, or have a new account for every bot.
 
-How is this done? Of course, it depends on how your services work, but here are some 
+How is this done? Of course, it depends on how your services work, but here are some
 possible approaches.
-
 
 ## Creating users at runtime
 
-You can create users on the fly and use the same credentials to log in.  This is
+You can create users on the fly and use the same credentials to log in. This is
 especially useful with integration style tests.
 
 ```elixir
@@ -60,10 +60,10 @@ post(
 ## Using a pool of existing users
 
 You might not want to create users as part of your test, especially if you are load
-testing and/or you use an external service to authenticate.  In that case you can
-create a pool of user accounts to draw from when logging in.  You probably won't be
+testing and/or you use an external service to authenticate. In that case you can
+create a pool of user accounts to draw from when logging in. You probably won't be
 able to (or want to) make as many user accounts as bots you plan on running, which
-means there will be some "sharing" of accounts.  Think of it as having multiple users
+means there will be some "sharing" of accounts. Think of it as having multiple users
 working on multiple devices at the same time with the same account.
 
 ```elixir
@@ -97,13 +97,11 @@ end
 
 ## Authorizing actions after having logged in
 
-Usually you receive some kind of session token after authenticating.  You'll need to
-hold on to this token in the `context` for subsequent actions to use when making 
+Usually you receive some kind of session token after authenticating. You'll need to
+hold on to this token in the `context` for subsequent actions to use when making
 authenticated API calls.
-
 
 One last thought - an alternative to having a pool of users is having a pool of
 tokens to draw from. You would need some separate service that took care of logging
 in and obtaining tokens and making them available, but it would let you avoid having
 an authentication step in your tests.
-

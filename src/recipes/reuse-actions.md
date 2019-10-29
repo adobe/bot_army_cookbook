@@ -1,5 +1,6 @@
 ---
 title: Reuse actions
+level: basic
 ---
 
 Actions are what give bots agency. But they also are the part of the bots that

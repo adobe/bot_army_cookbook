@@ -1,5 +1,6 @@
 ---
 title: Track current state
+level: basic
 ---
 
 Each bot has a `context` or current state (also called a "blackboard" in Behavior

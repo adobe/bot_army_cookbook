@@ -1,5 +1,6 @@
 ---
 title: Validate expectations
+level: basic
 draft: true
 ---
 

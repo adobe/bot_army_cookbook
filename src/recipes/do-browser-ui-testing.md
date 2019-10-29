@@ -1,5 +1,6 @@
 ---
 title: Do browser UI testing
+level: advanced
 ---
 
 Can the bots use a browser? Yes they can. It's pretty simple actually, you just need

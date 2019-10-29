@@ -1,5 +1,6 @@
 ---
 title: Set default values
+level: intermediate
 ---
 
 In order to make your actions more flexible and reusable, you probably will want to

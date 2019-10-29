@@ -1,5 +1,6 @@
 ---
 title: Parameterize actions
+level: basic
 ---
 
 Actions are intended to be simple and atomic to maximize reuse. A key factor in

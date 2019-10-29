@@ -1,5 +1,6 @@
 ---
 title: Reuse subtrees
+level: basic
 ---
 
 One of the most powerful features of Behavior Trees is that you can build up lots of

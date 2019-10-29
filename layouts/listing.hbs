@@ -15,24 +15,12 @@
       </div>
 
       <div id="recipes">
-        {{#each collections.recipes}}
-          {{#unless this.draft }}
-          <h4 class="flex items-center p-2 hover:bg-gray-100 rounded">
-            <i class="fas fa-robot text-steelblue mr-3"></i>
-            <a class="hover:text-shadow-lg hover:no-underline font-display text-3xl font-bold text-steelblue text-shadow no-underline" href="{{ path }}">{{ title }}</a>
-          </h4>
-          {{/unless}}
-        {{/each}}
-
-        <h3 class="mt-16 opacity-75">(In progress...)</h3>
-        {{#each collections.recipes}}
-          {{#if this.draft }}
-          <h4 class="flex items-center p-2 hover:bg-gray-100 rounded opacity-75">
-            <i class="fas fa-robot text-steelblue mr-3"></i>
-            <a class="hover:text-shadow-lg hover:no-underline font-display text-3xl font-bold text-steelblue text-shadow no-underline" href="{{ path }}">{{ title }}</a>
-          </h4>
-          {{/if}}
-        {{/each}}
+      {{#each collections.recipes}}
+        <div class="flex items-center p-2 hover:bg-gray-100 rounded {{#if this.draft}}opacity-50{{/if}}">
+          <i class="fas fa-robot text-steelblue mr-3"></i>
+          <h4><a class="hover:text-shadow-lg hover:no-underline font-display text-3xl font-bold text-steelblue text-shadow no-underline" href="{{ path }}">{{ title }}</a></h4>
+        </div>
+      {{/each}}
       </div>
 
       <p class="mt-4">

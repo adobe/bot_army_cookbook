@@ -1,5 +1,6 @@
 ---
 title: Generate meaningful logs
+level: basic
 draft: true
 ---
 

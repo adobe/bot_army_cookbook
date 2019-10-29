@@ -51,9 +51,14 @@ input:focus {
   @apply outline-none border-steelblue;
 }
 
+#recipes > .opacity-50::after {
+  content: "(wip)";
+  @apply block text-gray-400 italic ml-4;
+}
+
 /* Container "locked" to measured initial full height to prevent page jump when
  * searching and reciple list goes away */
-#content {
+#content.home {
   min-height: 2400px;
 }
 

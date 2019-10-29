@@ -1,5 +1,6 @@
 ---
 title: Conditionally run actions
+level: basic
 ---
 
 The power of the bots is that they are _organic_, and can _respond_ to their current

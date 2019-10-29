@@ -1,5 +1,6 @@
 ---
 title: Use long-polling
+level: advanced
 draft: true
 ---
 

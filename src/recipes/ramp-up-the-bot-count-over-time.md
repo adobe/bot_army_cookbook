@@ -1,5 +1,6 @@
 ---
 title: Ramp up the bot count over time
+level: intermediate
 draft: true
 ---
 

@@ -1,6 +1,7 @@
 ---
 title: Recipes for building your bots
 layout: listing.hbs
+home: true
 ---
 
 The "Bot Army" is a tool for testing apps and services with AI-powered "bots." It

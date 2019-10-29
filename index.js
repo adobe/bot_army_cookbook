@@ -40,6 +40,7 @@ Metalsmith(__dirname)
                 paths: {
                     "${source}/**/*": "**/*.md",
                     "${source}/scripts.js": true,
+                    "${source}/styles.css": true,
                     "layouts/**/*": "**/*.md",
                     "partials/*": "**/*.md"
                 },
@@ -47,7 +48,19 @@ Metalsmith(__dirname)
             })
         )
     )
-    .use(collections({ recipes: "recipes/*.md" }))
+    .use(
+        collections({
+            recipes: {
+                pattern: "recipes/*.md",
+                sortBy: (a, b) => {
+                    const levels = { basic: 1, intermediate: 2, advanced: 3 };
+                    let compare = levels[a.level] - levels[b.level];
+                    if (compare === 0) compare = a.title - b.title;
+                    return compare;
+                }
+            }
+        })
+    )
     .use(
         metadata({
             "collections.recipes": {
