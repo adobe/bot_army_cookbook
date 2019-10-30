@@ -55,7 +55,7 @@ Metalsmith(__dirname)
                 sortBy: (a, b) => {
                     const levels = { basic: 1, intermediate: 2, advanced: 3 };
                     let compare = levels[a.level] - levels[b.level];
-                    if (compare === 0) compare = a.title - b.title;
+                    if (compare === 0) compare = a.title.localeCompare(b.title);
                     return compare;
                 }
             }
