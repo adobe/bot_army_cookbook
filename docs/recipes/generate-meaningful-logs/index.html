@@ -20,18 +20,35 @@
       <h1>How do I...  Generate meaningful logs?</h1>
     </header>
 
-    <p>Your bots are busy, and you need a way to keep an eye on what they are doing without being overwhelmed.</p>
+    <p>Your bots are busy, and you need a way to keep an eye on what they are doing without
+being overwhelmed.</p>
 <h2 id="built-in-logs">Built in logs</h2>
-<p>The bot army already logs lots of useful information, such as every action that happens, tied to the bot id, plus the duration and outcome. The logs look like this:</p>
+<p>The bot army already logs lots of useful information, such as every action that
+happens, tied to the bot id, plus the duration and outcome. The logs look like this:</p>
 <pre><code class="hljs">12:10:51.330 <span class="hljs-attribute">bot_id</span>=1 <span class="hljs-attribute">action</span>=MyBots.Actions.User.create <span class="hljs-attribute">outcome</span>=succeed <span class="hljs-attribute">duration</span>=213 [<span class="hljs-builtin-name">info</span>]</code></pre>
 
-<p>You can include your own custom data in each of these logs by calling <code>Logger.metadata(custom: &quot; pool_id=#{pool_id}&quot;)</code> for example (the key must be <code>custom</code> and the value must start with a space).</p>
-<p>These logs are written to <code>/bot_run.log</code>. You can send them to a log aggregator like splunk where you can do all kinds of analysis, or inspect them locally (see some tips to <a href="https://git.corp.adobe.com/pages/manticore/bot_army/readme.html#logging">make that easier</a>).</p>
+<p>You can include your own custom data in each of these logs by calling
+<code>Logger.metadata(custom: &quot; pool_id=#{pool_id}&quot;)</code> for example (the key must be
+<code>custom</code> and the value must start with a space).</p>
+<p>These logs are written to <code>/bot_run.log</code>. You can send them to a log aggregator like
+splunk where you can do all kinds of analysis, or inspect them locally (see some tips
+to <a href="https://git.corp.adobe.com/pages/manticore/bot_army/readme.html#logging">make that easier</a>).</p>
 <h2 id="additional-logging">Additional logging</h2>
-<p>Of course you can also add custom logs in your actions. I recommend using <code>Logger.debug(...)</code>. This way, your custom logs are at a different level than all the <code>info</code> and up logs that the bot army makes, which makes it easier to separate them out if desired. See <a href="https://hexdocs.pm/logger/Logger.html#content">Logger</a> for more details. As always, be careful about exposing sensitive information. <code>Logger</code> is also better than <code>IO.inspect</code> or <code>IO.puts</code>, because you have more control over its behavior. Using <code>inspect(unknown_value, pretty: true)</code> in your logs is useful, as is string interpolation (<code>&quot;User name: #{user_name}&quot;</code>).</p>
-<p>You can also use <a href="https://git.corp.adobe.com/pages/manticore/bot_army/BotArmy.Actions.html#log/2"><code>BotArmy.Actions.log</code></a> in your tree to log static information.</p>
+<p>Of course you can also add custom logs in your actions. I recommend using
+<code>Logger.debug(...)</code>. This way, your custom logs are at a different level than all the
+<code>info</code> and up logs that the bot army makes, which makes it easier to separate them
+out if desired. See <a href="https://hexdocs.pm/logger/Logger.html#content">Logger</a> for more details. As always, be careful about exposing
+sensitive information. <code>Logger</code> is also better than <code>IO.inspect</code> or <code>IO.puts</code>,
+because you have more control over its behavior. Using
+<code>inspect(unknown_value, pretty: true)</code> in your logs is useful, as is string
+interpolation (<code>&quot;User name: #{user_name}&quot;</code>).</p>
+<p>You can also use <a href="https://git.corp.adobe.com/pages/manticore/bot_army/BotArmy.Actions.html#log/2"><code>BotArmy.Actions.log</code></a> in your tree to log static
+information.</p>
 <h2 id="which-logs-matter-">Which logs matter?</h2>
-<p>Ultimately, the bot logs may be useful for debugging or for seeing timing including latency, but your server logs are probably more useful. If you include a <code>session_id</code> in your bot logs and your server, you can connect the logs in your aggregator for a complete picture.</p>
+<p>Ultimately, the bot logs may be useful for debugging or for seeing timing including
+latency, but your server logs are probably more useful. If you include a <code>session_id</code>
+in your bot logs and your server, you can connect the logs in your aggregator for a
+complete picture.</p>
 
 
         <footer>
