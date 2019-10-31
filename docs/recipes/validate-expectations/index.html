@@ -24,22 +24,22 @@
 functional tests, but is also useful in any test that needs to wait for something to
 happen before moving on.</p>
 <p>While you can always validate API responses right when you call them (usually with
-pattern matching in a <code>case</code> or <code>with</code> statement), you&#39;ll often need to separate your
-actions into a &quot;fetch&quot; step and a &quot;validate&quot; step. If your validation is in it&#39;s own
-step, you&#39;ll have to rely on the <code>context</code> to access the data that was previously
+pattern matching in a <code>case</code> or <code>with</code> statement), you&apos;ll often need to separate your
+actions into a &quot;fetch&quot; step and a &quot;validate&quot; step. If your validation is in it&apos;s own
+step, you&apos;ll have to rely on the <code>context</code> to access the data that was previously
 fetched and stored.</p>
 <p>You can hard code your expectations in your trees (even if they have some degree of
 randomness) like this:</p>
 <pre><code class="hljs elixir"><span class="hljs-comment"># your tree</span>
-parallel <span class="hljs-string">"changing post name"</span> <span class="hljs-keyword">do</span>
-  name = <span class="hljs-string">"My post "</span> &lt;&gt; random_string()
+parallel <span class="hljs-string">&quot;changing post name&quot;</span> <span class="hljs-keyword">do</span>
+  name = <span class="hljs-string">&quot;My post &quot;</span> &lt;&gt; random_string()
   Node.sequence([
     log_in(),
     <span class="hljs-comment"># this sets `context.current_post` to the HTTP resonse</span>
     action(Post, <span class="hljs-symbol">:create</span>, [%{<span class="hljs-symbol">name:</span> name}]),
     <span class="hljs-comment"># this updates `context.current_post` with the updated HTTP response</span>
-    action(Post, <span class="hljs-symbol">:update_current_post</span>, [%{<span class="hljs-symbol">name:</span> name &lt;&gt; <span class="hljs-string">"updated!"</span>}]),
-    action(Post, <span class="hljs-symbol">:validate_current_post</span>, [%{<span class="hljs-symbol">name:</span> name &lt;&gt; <span class="hljs-string">"updated!"</span>}]),
+    action(Post, <span class="hljs-symbol">:update_current_post</span>, [%{<span class="hljs-symbol">name:</span> name &lt;&gt; <span class="hljs-string">&quot;updated!&quot;</span>}]),
+    action(Post, <span class="hljs-symbol">:validate_current_post</span>, [%{<span class="hljs-symbol">name:</span> name &lt;&gt; <span class="hljs-string">&quot;updated!&quot;</span>}]),
   ])
 <span class="hljs-keyword">end</span>
 
@@ -53,7 +53,7 @@ parallel <span class="hljs-string">"changing post name"</span> <span class="hljs
 
 <p>Note the <a href="https://elixir-lang.org/getting-started/pattern-matching.html#the-pin-operator">pin operator</a> (<code>^</code>) in the pattern matching, which matches against the
 value of <code>expected_values</code> instead of rebinding the matched value to that variable
-(that&#39;s not entirely true, as Elixir values are immutable, but functionally that&#39;s
+(that&apos;s not entirely true, as Elixir values are immutable, but functionally that&apos;s
 how it works).</p>
 <p>Also note that pattern matching maps will only check the supplied fields, so this
 will pass even if the current post has more fields than what you specify in
@@ -62,14 +62,14 @@ will pass even if the current post has more fields than what you specify in
 This may be useful for example to store the number of posts after fetching them,
 and using that later to check if the number changes after updating, adding or
 deleting a post.</p>
-<h2 id="retries">Retries</h2>
+<h2 id="retries"><a class="heading-anchor" href="#retries"><i class="fas fa-link"></i></a>Retries</h2>
 <p>One of the trickiest parts of validation is validating asynchronous data. The data
 may not have arrived, or only partially arrived when you attempt to validate it. How
 do you know if it is incorrect, or merely still in transit?</p>
 <p>A common approach is to retry your validation multiple times, pausing between
-attempts, until the data is correct, or you decide you&#39;ve waited long enough and give
+attempts, until the data is correct, or you decide you&apos;ve waited long enough and give
 up.</p>
-<p>See <a href="../repeat-actions/">how to repeat actions</a> and <a href="https://git.corp.adobe.com/schomay/bot_army_ui_testing_demo/blob/master/lib/actions/cookbook.ex#L117"><code>retry_with_timeout</code></a> for two expressive ways to do
+<p>See <a href="../repeat-actions/#limiting-retries">how to repeat actions</a> and <a href="https://git.corp.adobe.com/schomay/bot_army_ui_testing_demo/blob/master/lib/actions/cookbook.ex#L117"><code>retry_with_timeout</code></a> for two expressive ways to do
 retries.</p>
 
 

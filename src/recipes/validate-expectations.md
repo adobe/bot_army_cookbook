@@ -66,6 +66,6 @@ up.
 See [how to repeat actions] and [`retry_with_timeout`] for two expressive ways to do
 retries.
 
-[how to repeat actions]: ../repeat-actions/
+[how to repeat actions]: ../repeat-actions/#limiting-retries
 [`retry_with_timeout`]: https://git.corp.adobe.com/schomay/bot_army_ui_testing_demo/blob/master/lib/actions/cookbook.ex#L117
 [pin]: https://elixir-lang.org/getting-started/pattern-matching.html#the-pin-operator

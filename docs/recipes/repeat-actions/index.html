@@ -20,11 +20,11 @@
       <h1>How do I...  Repeat actions?</h1>
     </header>
 
-    <p>You probably won&#39;t get far in writing a bot before you need some kind of a loop.
+    <p>You probably won&apos;t get far in writing a bot before you need some kind of a loop.
 Long-running bots run in a loop by their very nature, and even linear integration
 tests often need to repeat certain actions or sequences. The bot army provides a
 number of ways to build loops and repeat actions.</p>
-<h2 id="when-a-tree-finishes">When a tree &quot;finishes&quot;</h2>
+<h2 id="when-a-tree-finishes"><a class="heading-anchor" href="#when-a-tree-finishes"><i class="fas fa-link"></i></a>When a tree &quot;finishes&quot;</h2>
 <p>When a bot gets to the end of its behavior tree, it will start again from the
 beginning. The only way to actually make a bot stop is to have an action return an
 outcome of <code>:done</code> or <code>{:error, reason}</code>. Be aware that when running a load test, the
@@ -42,7 +42,7 @@ repeating.</p>
 
 <p>Sometimes you might want this, but other times you may only want a portion of the
 tree to repeat.</p>
-<h2 id="using-the-repeat_n-node">Using the <code>repeat_n</code> node</h2>
+<h2 id="using-the-repeat_n-node"><a class="heading-anchor" href="#using-the-repeat_n-node"><i class="fas fa-link"></i></a>Using the <code>repeat_n</code> node</h2>
 <p>You can nest any action or subtree under the <a href="https://hexdocs.pm/behavior_tree/BehaviorTree.Node.html#repeat_n/2"><code>repeat_n</code> node</a>, and it will be
 repeated the specified number of times, regardless of its outcome. Note the <a href="https://git.corp.adobe.com/pages/manticore/bot_army/BotArmy.Actions.html#done/1">done
 action</a> to stop the bot.</p>
@@ -57,7 +57,7 @@ action</a> to stop the bot.</p>
 
 <p>This is the most straightforward approach, but sometimes you want to repeat steps
 conditionally (more like a &quot;while loop&quot;).</p>
-<h2 id="using-the-continue-outcome">Using the <code>:continue</code> outcome</h2>
+<h2 id="using-the-continue-outcome"><a class="heading-anchor" href="#using-the-continue-outcome"><i class="fas fa-link"></i></a>Using the <code>:continue</code> outcome</h2>
 <p>Bots traverse their behavior trees based on <code>:fail</code> and <code>:succeed</code> node outcomes.
 But there is actually another outcome that tells the behavior tree to stay on the
 same node it is already on: <code>:continue</code>.</p>
@@ -68,7 +68,7 @@ your bot would repeat that action forever.</p>
 tree, which makes the action less atomic, and thus less flexible and reusable.
 Controlling loops via the tree is generally a better approach, plus you can repeat
 full subtrees instead of a single action.</p>
-<h2 id="conditional-repeats">Conditional repeats</h2>
+<h2 id="conditional-repeats"><a class="heading-anchor" href="#conditional-repeats"><i class="fas fa-link"></i></a>Conditional repeats</h2>
 <p>The main approach handling repeat logic in the tree is to use one of
 <a href="https://hexdocs.pm/behavior_tree/BehaviorTree.Node.html#repeat_until_fail/1"><code>repeat_until_fail</code></a> or <a href="https://hexdocs.pm/behavior_tree/BehaviorTree.Node.html#repeat_until_succeed/1"><code>repeat_until_succeed</code></a>. These can be a little tricky
 to use, and might require a subtree with some logic in it (see the <a href="../conditionally-run-actions/">conditionally run
@@ -89,12 +89,12 @@ actions</a> recipe), but the basic concept is simple:</p>
 
 <p>Notice how this uses <a href="https://hexdocs.pm/behavior_tree/BehaviorTree.Node.html#always_succeed/1"><code>always_succeed</code></a> to ensure that only <code>select_next_post</code>
 will break the loop.</p>
-<h2 id="limiting-retries">Limiting retries</h2>
+<h2 id="limiting-retries"><a class="heading-anchor" href="#limiting-retries"><i class="fas fa-link"></i></a>Limiting retries</h2>
 <p>You might have noticed in the previous example that if <code>select_next_post</code> never
-fails, you will be stuck in an infinite loop. Sometimes you don&#39;t know if an action
+fails, you will be stuck in an infinite loop. Sometimes you don&apos;t know if an action
 will eventually fail (or succeed), especially when you are doing <a href="../validate-expectations">validation style
 actions</a>, so you need a way limit how many times you loop.</p>
-<p>One approach is to store a counter in the bot&#39;s context, and to be sure to increment
+<p>One approach is to store a counter in the bot&apos;s context, and to be sure to increment
 it every time you loop, and also to break the loop if it goes over your limit. Keep
 in mind that actions should be as simple and atomic as possible, so this is a
 slippery slope, but you can encapsulate this retry logic in a helper like this:</p>

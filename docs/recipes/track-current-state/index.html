@@ -37,12 +37,12 @@ For example:</p>
     <span class="hljs-comment"># chooses an album from `context.albums` and sets `context.current_album`</span>
     action(Albums, <span class="hljs-symbol">:select</span>, [[<span class="hljs-symbol">random:</span> <span class="hljs-keyword">true</span>]]),
     <span class="hljs-comment"># updates the album with the id from `context.current_album`</span>
-    action(Albums, <span class="hljs-symbol">:update_name</span>, [<span class="hljs-string">"new name"</span>])
+    action(Albums, <span class="hljs-symbol">:update_name</span>, [<span class="hljs-string">&quot;new name&quot;</span>])
   ])
 <span class="hljs-keyword">end</span></code></pre>
 
 <p>This works well, but it does mean you have to know what is in your context, which
-adds cognitive load, and isn&#39;t very visible. It also means your actions should deal
+adds cognitive load, and isn&apos;t very visible. It also means your actions should deal
 with missing information appropriately. Perhaps this means failing or erroring, or
 perhaps your actions have a fallback value to use. Make sure to use
 <code>Map.get(context, :my_key, my_fallback)</code> if you want to avoid unexpected &quot;key not

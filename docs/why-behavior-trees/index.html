@@ -21,10 +21,10 @@
     </header>
 
     <p>Simulating real users is hard.  When testing, we want to be able to describe how to
-react to a given situation, without being too rigid.  We&#39;d like to be able to
+react to a given situation, without being too rigid.  We&apos;d like to be able to
 describe complex behaviors and conditional sequences in a way that is easy to manage
 and change.</p>
-<p>Behavior trees are the technology that power the non-player-characters&#39; AI in video
+<p>Behavior trees are the technology that power the non-player-characters&apos; AI in video
 games.  They are similar to finite state machines, but simpler to manage, especially
 as they get more and more complex.</p>
 <blockquote>
@@ -35,7 +35,7 @@ complex behaviors by nesting smaller subtrees.</li>
 <li><strong>Each node has 2 possible transitions: &quot;fail&quot; or &quot;succeed.&quot;</strong>  These are the only 2
 transitions, no matter how many nodes you add.</li>
 <li><strong>Leaf nodes are actions.</strong>  Actions can do what ever you want, including reading the
-bot&#39;s state, performing side effects, and updating the bot&#39;s state.  Actions must 
+bot&apos;s state, performing side effects, and updating the bot&apos;s state.  Actions must 
 report if they failed or succeeded.</li>
 <li><strong>Internal nodes are control nodes</strong> - they control traversal through the tree.  There 
 are a number of <a href="https://hexdocs.pm/behavior_tree/BehaviorTree.Node.html#content">available control 
@@ -61,7 +61,7 @@ actions can be reused in different orders in different trees.</p>
     select([
       action(MyActions, <span class="hljs-symbol">:try_something</span>, [<span class="hljs-number">42</span>]),
       action(MyActions, <span class="hljs-symbol">:try_something_else</span>),
-      action(CommonActions, <span class="hljs-symbol">:error</span>, [<span class="hljs-string">"Darn, didn't work!"</span>])
+      action(CommonActions, <span class="hljs-symbol">:error</span>, [<span class="hljs-string">&quot;Darn, didn&apos;t work!&quot;</span>])
     ]),
     MyOtherTree.tree(),
     action(CommonActions, <span class="hljs-symbol">:done</span>)

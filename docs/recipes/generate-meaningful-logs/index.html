@@ -22,7 +22,7 @@
 
     <p>Your bots are busy, and you need a way to keep an eye on what they are doing without
 being overwhelmed.</p>
-<h2 id="built-in-logs">Built in logs</h2>
+<h2 id="built-in-logs"><a class="heading-anchor" href="#built-in-logs"><i class="fas fa-link"></i></a>Built in logs</h2>
 <p>The bot army already logs lots of useful information, such as every action that
 happens, tied to the bot id, plus the duration and outcome. The logs look like this:</p>
 <pre><code class="hljs">12:10:51.330 <span class="hljs-attribute">bot_id</span>=1 <span class="hljs-attribute">action</span>=MyBots.Actions.User.create <span class="hljs-attribute">outcome</span>=succeed <span class="hljs-attribute">duration</span>=213 [<span class="hljs-builtin-name">info</span>]</code></pre>
@@ -33,7 +33,7 @@ happens, tied to the bot id, plus the duration and outcome. The logs look like t
 <p>These logs are written to <code>/bot_run.log</code>. You can send them to a log aggregator like
 splunk where you can do all kinds of analysis, or inspect them locally (see some tips
 to <a href="https://git.corp.adobe.com/pages/manticore/bot_army/readme.html#logging">make that easier</a>).</p>
-<h2 id="additional-logging">Additional logging</h2>
+<h2 id="additional-logging"><a class="heading-anchor" href="#additional-logging"><i class="fas fa-link"></i></a>Additional logging</h2>
 <p>Of course you can also add custom logs in your actions. I recommend using
 <code>Logger.debug(...)</code>. This way, your custom logs are at a different level than all the
 <code>info</code> and up logs that the bot army makes, which makes it easier to separate them
@@ -44,7 +44,7 @@ because you have more control over its behavior. Using
 interpolation (<code>&quot;User name: #{user_name}&quot;</code>).</p>
 <p>You can also use <a href="https://git.corp.adobe.com/pages/manticore/bot_army/BotArmy.Actions.html#log/2"><code>BotArmy.Actions.log</code></a> in your tree to log static
 information.</p>
-<h2 id="which-logs-matter-">Which logs matter?</h2>
+<h2 id="which-logs-matter-"><a class="heading-anchor" href="#which-logs-matter-"><i class="fas fa-link"></i></a>Which logs matter?</h2>
 <p>Ultimately, the bot logs may be useful for debugging or for seeing timing including
 latency, but your server logs are probably more useful. If you include a <code>session_id</code>
 in your bot logs and your server, you can connect the logs in your aggregator for a

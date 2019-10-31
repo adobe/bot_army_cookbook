@@ -25,7 +25,7 @@ require writing custom code. When you add more functionality, you need to write 
 actions. Ideally, you can craft your actions in such a way that they can be mixed
 and matched in different ways without having to make changes to them every time.</p>
 <p>Here are a few tips for maximizing reuse.</p>
-<h2 id="keep-actions-atomic">Keep actions atomic</h2>
+<h2 id="keep-actions-atomic"><a class="heading-anchor" href="#keep-actions-atomic"><i class="fas fa-link"></i></a>Keep actions atomic</h2>
 <p>Actions should represent simple commands: &quot;Fetch all posts.&quot; &quot;Update album name.&quot;
 &quot;Download image.&quot; In some ways, they are thin wrappers around an interface for
 interacting with an external system. The only logic they should contain is how they
@@ -33,23 +33,23 @@ perform their command, and how to report back the outcome and any relevant data.
 <p>Any further logic than that should be <a href="../conditionally-run-actions/">defined by the structure of the tree</a>.
 If an action performs any logic on its own, it becomes specialized to only one way of
 using it.</p>
-<h2 id="-fail-vs-error-outcomes"><code>:fail</code> vs. <code>:error</code> outcomes</h2>
-<p>At first you may be inclined to make your bot error if an action doesn&#39;t work. This
+<h2 id="-fail-vs-error-outcomes"><a class="heading-anchor" href="#-fail-vs-error-outcomes"><i class="fas fa-link"></i></a><code>:fail</code> vs. <code>:error</code> outcomes</h2>
+<p>At first you may be inclined to make your bot error if an action doesn&apos;t work. This
 makes sense, but the problem is that if your action errors, the bot will die
 immediately. You might want to use the action in a different way where you have a
-fallback action if it doesn&#39;t work, but you won&#39;t be able to if the first one errors.</p>
+fallback action if it doesn&apos;t work, but you won&apos;t be able to if the first one errors.</p>
 <p>It is better to always <code>:fail</code>. You can always wrap it in a <code>Node.select</code> and follow
 it with <a href="https://git.corp.adobe.com/pages/manticore/bot_army/BotArmy.Actions.html#error/2"><code>BotArmy.Action.error</code></a>. This way you can decide if the bot should
 die
 at the tree level, instead of the action level.</p>
-<h2 id="be-careful-about-side-effects">Be careful about side effects</h2>
+<h2 id="be-careful-about-side-effects"><a class="heading-anchor" href="#be-careful-about-side-effects"><i class="fas fa-link"></i></a>Be careful about side effects</h2>
 <p>By definition, actions are side effects. The problem comes in when you want an
 action to perform a side effect in one use case, but not another. You could pass in
 a flag to parameterize the side effect, but that is messy.</p>
 <p>It is better to wrap the side effect in its own action and run it after your action
 in a <code>Node.sequence</code>. This way you can decide if the side effect should happen at the
 tree level instead of the action level.</p>
-<h2 id="keep-actions-flexible">Keep actions flexible</h2>
+<h2 id="keep-actions-flexible"><a class="heading-anchor" href="#keep-actions-flexible"><i class="fas fa-link"></i></a>Keep actions flexible</h2>
 <p>You probably will need to make actions flexible in order to get full use out of them.
 See how to <a href="../parameterize-actions/">parameterize actions</a> on more tips on how to do this.</p>
 <p>By following these tips, you can reuse actions, not only in different ways for

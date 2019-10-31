@@ -51,6 +51,23 @@ input:focus {
   @apply outline-none border-steelblue;
 }
 
+.heading-anchor {
+  @apply hidden absolute -ml-12 pr-6 pl-6;
+}
+
+.heading-anchor i {
+  @apply text-gray-400 text-sm;
+}
+
+h1:hover .heading-anchor,
+h2:hover .heading-anchor,
+h3:hover .heading-anchor,
+h4:hover .heading-anchor,
+h5:hover .heading-anchor,
+h6:hover .heading-anchor {
+  @apply inline-block;
+}
+
 #recipes > .opacity-50::after {
   content: "(wip)";
   @apply block text-gray-400 italic ml-4;

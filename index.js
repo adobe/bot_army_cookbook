@@ -15,6 +15,7 @@ var metallic = require("metalsmith-metallic");
 var msIf = require("metalsmith-if");
 var rootPath = require("metalsmith-rootpath");
 var lunr = require("metalsmith-lunr");
+var headingsidentifier = require("metalsmith-headings-identifier");
 
 const isDev = process.argv.indexOf("--dev") >= 0;
 const port = 8000;
@@ -88,6 +89,13 @@ Metalsmith(__dirname)
     .use(markdown())
     .use(permalinks({ relative: false }))
     .use(rootPath())
+    .use(
+        headingsidentifier({
+            linkTemplate:
+        "<a class=\"heading-anchor\" href=\"#%s\"><i class=\"fas fa-link\"></i></a>",
+            selector: "h2"
+        })
+    )
     .use(
         lunr({
             fields: {

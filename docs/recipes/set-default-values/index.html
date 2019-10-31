@@ -21,7 +21,7 @@
     </header>
 
     <p>In order to make your actions more flexible and reusable, you probably will want to
-provide default values in some cases. This isn&#39;t difficult, but you have a few
+provide default values in some cases. This isn&apos;t difficult, but you have a few
 options on how to do it:</p>
 <ul>
 <li>function parameter defaults (optionally combined with pattern matching)</li>
@@ -30,24 +30,24 @@ options on how to do it:</p>
 </ul>
 <p>Here is a fairly advanced example using of these options to make an action that can
 be used in many different ways:</p>
-<pre><code class="hljs elixir"><span class="hljs-variable">@doc</span> <span class="hljs-string">""</span><span class="hljs-string">"
+<pre><code class="hljs elixir"><span class="hljs-variable">@doc</span> <span class="hljs-string">&quot;&quot;</span><span class="hljs-string">&quot;
 Reply to a feed item.  Can be called in different ways:
 
-1) `reply(context, feed_item_id, "</span>reply text<span class="hljs-string">")` where `feed_item_id` is a string to
+1) `reply(context, feed_item_id, &quot;</span>reply text<span class="hljs-string">&quot;)` where `feed_item_id` is a string to
    reply to a specific feed item
 
-2) `reply(context, feed_type, "</span>reply text<span class="hljs-string">") where `feed_type` is one of `:post`,
+2) `reply(context, feed_type, &quot;</span>reply text<span class="hljs-string">&quot;) where `feed_type` is one of `:post`,
    `:asset`, or `:reply` to reply to a randomly chosen feed item of the specified
    type
 
-3) `reply(context, "</span>reply text<span class="hljs-string">")` to reply to a randomly chosen feed item of a
+3) `reply(context, &quot;</span>reply text<span class="hljs-string">&quot;)` to reply to a randomly chosen feed item of a
    randomly chosen feed type
 
 You can also leave off the reply text in any version to use randomly generated text.
 
 In addition, you can supply a 4th paramater as a string to use as the reply name,
 otherwise `context.username` will be used.
-"</span><span class="hljs-string">""</span>
+&quot;</span><span class="hljs-string">&quot;&quot;</span>
 
 <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">reply</span></span>(
       _context,
@@ -58,7 +58,7 @@ otherwise `context.username` will be used.
 
 <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">reply</span></span>(context, feed_item_id, text, reply_name_override)
     <span class="hljs-keyword">when</span> is_binary(feed_item_id) <span class="hljs-keyword">do</span>
-  reply_name = reply_name_override || Map.get(context, <span class="hljs-symbol">:username</span>, <span class="hljs-string">"no name"</span>)
+  reply_name = reply_name_override || Map.get(context, <span class="hljs-symbol">:username</span>, <span class="hljs-string">&quot;no name&quot;</span>)
   <span class="hljs-comment"># ...</span>
 <span class="hljs-keyword">end</span>
 
@@ -72,21 +72,21 @@ otherwise `context.username` will be used.
   <span class="hljs-comment"># ...</span>
 <span class="hljs-keyword">end</span></code></pre>
 
-<p>There&#39;s a lot going on here, so let&#39;s unpack it.</p>
+<p>There&apos;s a lot going on here, so let&apos;s unpack it.</p>
 <p>First, if you define a function that has default values and multiple clauses, you
 need to make a &quot;function header&quot; which specifies the defaults but has no body. You
-will get a descriptive error if you forget. If you don&#39;t have multiple clauses, you
+will get a descriptive error if you forget. If you don&apos;t have multiple clauses, you
 can put your default values in your normal function definition. In this case, the
 first <code>def</code> line is the header, specifying default values.</p>
 <p>This <code>reply</code> function always has an arity of 4, even if you call it with less
 arguments. <code>context</code> is the only required parameter. The default values will be
-applied if you don&#39;t specify those parameters yourself.</p>
+applied if you don&apos;t specify those parameters yourself.</p>
 <p>A common trick is to make a parameter optional by providing a default parameter of
 <code>nil</code>. We do this for <code>reply_name_override</code>, then use <code>||</code> to provide a fallback. In
-this case the fallback has a fallback (with <code>Map.get</code>), since we don&#39;t know if
+this case the fallback has a fallback (with <code>Map.get</code>), since we don&apos;t know if
 <code>username</code> exists in the <code>context</code>.</p>
 <p>For <code>type</code> and <code>text</code> we define default values in the function definition. Note that
-the code after the <code>\\</code> only runs if an argument for that parameter wasn&#39;t provided,
+the code after the <code>\\</code> only runs if an argument for that parameter wasn&apos;t provided,
 so the various random functions will run with new random values each time this action
 is called. Using a call-time function like this is a powerful trick.</p>
 <p>Finally, the various pattern matching variations of the function define how to

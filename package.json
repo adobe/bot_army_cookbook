@@ -9,6 +9,7 @@
     "metalsmith-collections": "^0.9.0",
     "metalsmith-discover-partials": "^0.1.2",
     "metalsmith-hbt-md": "^1.0.1",
+    "metalsmith-headings-identifier": "0.0.11",
     "metalsmith-if": "^0.1.1",
     "metalsmith-layouts": "^1.4.1",
     "metalsmith-lunr": "pburrows/metalsmith-lunr",
