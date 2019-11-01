@@ -20,8 +20,23 @@
       <h1>How do I...  Ramp up the bot count over time?</h1>
     </header>
 
-    <pre><code>- via random wait times (uniform)
-</code></pre>
+    <p>When running a load test, you might want to increase the load over time. Normally,
+this would be a feature of the test runner, but you can actually control it yourself
+with a clever use of <a href="https://git.corp.adobe.com/pages/manticore/bot_army/BotArmy.Actions.html#wait/3"><code>BotArmy.Actions.wait</code></a>.</p>
+<p>Simply start your tree with:</p>
+<pre><code class="hljs elixir"><span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">tree</span></span> <span class="hljs-keyword">do</span>
+  Node.sequence([
+    action(BotArmy.Actions, <span class="hljs-symbol">:wait</span>, [<span class="hljs-number">0</span>, ramp_up_period_in_seconds]),
+    ...
+  ])
+<span class="hljs-keyword">end</span></code></pre>
+
+<p>Each bot will choose a random number of seconds within your defined bounds to wait
+before continuing with the rest of the tree. The tricky part is realizing that
+because the random functionality uses a uniform distribution, the wait times <em>should</em>
+be more or less evenly spaced across the ramp-up duration. You can use this trick in
+other similar situations, such as <a href="../use-different-trees-for-different-bots">using different trees for different bots</a>.</p>
+
 
         <footer>
         </footer>
