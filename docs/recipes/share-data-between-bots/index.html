@@ -20,10 +20,96 @@
       <h1>How do I...  Share data between bots?</h1>
     </header>
 
-    <pre><code>- Load test config/metadata
-- SharedData
-- create/share/join invite workflow
-</code></pre>
+    <p>Bots share data between <em>actions</em> via the <code>context</code>. But how do you share data
+between different bots?</p>
+<p>The bot army provides a <a href="https://git.corp.adobe.com/pages/manticore/bot_army/BotArmy.SharedData.html#content"><code>SharedData</code></a> module just for this case. It
+works similar to the <code>get</code>/<code>put</code>/<code>update</code> features of <code>Map</code>, allowing you to define
+key value pairs in a global space. Also, any custom config <a href="https://git.corp.adobe.com/pages/manticore/bot_army/Mix.Tasks.Bots.LoadTest.html">passed in</a> when you
+start your test will be available in <code>SharedData</code> to access in your actions or trees.</p>
+<h2 id="accessing-custom-config"><a class="heading-anchor" href="#accessing-custom-config"><i class="fas fa-link"></i></a>Accessing custom config</h2>
+<p>This is how you would set and use custom config:</p>
+<pre><code class="hljs elixir"><span class="hljs-comment"># start your tests like this from the command line:</span>
+<span class="hljs-comment"># mix bots.load_test --n 100 --tree &quot;MyBots.MyTree&quot; --custom &apos;[run_id: &quot;abc&quot;, num_albums: 20]&apos;</span>
+
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">tree</span></span> <span class="hljs-keyword">do</span>
+  albums_to_create = BotArmy.SharedData.get(<span class="hljs-symbol">:num_albums</span>) || <span class="hljs-number">10</span>
+
+  Node.sequence([
+    action(BotArmy.Actions, <span class="hljs-symbol">:log</span>, [<span class="hljs-string">&quot;run_id: &quot;</span> &lt;&gt; BotArmy.SharedData.get(<span class="hljs-symbol">:app_id</span>)]),
+    Node.repeat_n(
+      albums_to_create,
+      Node.sequence([
+        action(MyActions, <span class="hljs-symbol">:create_album</span>),
+        ...
+      ])
+    ),
+    ...
+  ])
+<span class="hljs-keyword">end</span></code></pre>
+
+<h2 id="concurrency-problems"><a class="heading-anchor" href="#concurrency-problems"><i class="fas fa-link"></i></a>Concurrency problems</h2>
+<p>Let&apos;s say you want to make a test where each bot will look in <code>SharedData</code> for an
+album invite to join, and if it doesn&apos;t find one, it will create an album and put the
+invite in <code>SharedData</code> for the other bots to use.</p>
+<p>Or as a small, yet significant variant, maybe you have a test where one bot creates
+an album, puts the invite id in <code>SharedData</code>, and then another bot joins it.</p>
+<p>These sound like very reasonable test cases. But beware, here be dragons!</p>
+<p>The problem is that as soon as you have multiple bots, running at the same time,
+trying to access the same shared resource, you have opened the box to all the
+concurrency challenges, such as race conditions and consistency issues.</p>
+<p>You might make the following <strong>incorrect</strong> tree for the first example:</p>
+<pre><code class="hljs elixir"><span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">tree</span></span> <span class="hljs-keyword">do</span>
+  Node.select([
+    Node.sequence([
+      action(MyActions, <span class="hljs-symbol">:get_invite_from_shared_data</span>),
+      action(MyActions, <span class="hljs-symbol">:join_selected_invite</span>)
+    ]),
+    Node.sequence([
+      action(MyActions, <span class="hljs-symbol">:create_album</span>),
+      action(MyActions, <span class="hljs-symbol">:put_invite_in_shared_data</span>)
+    ])
+  ]),
+  ...
+<span class="hljs-keyword">end</span></code></pre>
+
+<p>The logic here is correct. The problem is that all bots will run this tree at about
+the same time, so they all will check <code>SharedData</code> for an invite at the same time,
+and they all will come up empty, so they all will go create an album and share the
+invite id. You just inadvertently created hundreds of albums and shared invites,
+with each bot in its own album.</p>
+<p>Fixing this situation is difficult. <code>SharedData</code> doesn&apos;t have any kind of locking
+system built in. If you build one on your own, you will have created a single
+bottleneck that all bots must pass through, which can cause problems.</p>
+<p>The easiest fix I&apos;ve come up with so far is to offset the bots so that you don&apos;t run
+into a situation where multiple bots are checking <code>SharedData</code> before it has a chance
+to get populated. You can do this by staggering the bot <a href="../ramp-up-the-bot-count-over-time">start up times</a>, but that
+won&apos;t grantee fixing the problem. You could also ensure only a single bot makes the
+albums, while the others wait. If you are doing integration testing, use a <code>pre</code> tree
+for that. Otherwise, you can do something like this:</p>
+<pre><code class="hljs elixir"><span class="hljs-comment"># in your tree</span>
+...
+Node.sequence([
+  action(MyActions, <span class="hljs-symbol">:check_bot_id</span>, [<span class="hljs-number">1</span>]),
+  action(MyActions, <span class="hljs-symbol">:create_album</span>)
+])
+...
+
+<span class="hljs-comment"># action</span>
+<span class="hljs-comment"># All bots have `context.id`, which starts at 0 and increments by 1.</span>
+<span class="hljs-comment"># Be careful, if a bot dies, that id will not be used again in other bots (until the</span>
+<span class="hljs-comment"># next run)!</span>
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">check_bot_id</span></span>(%{<span class="hljs-symbol">id:</span> id}, allowed) <span class="hljs-keyword">when</span> id == allowed, <span class="hljs-symbol">do:</span> <span class="hljs-symbol">:succeed</span>
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">check_bot_id</span></span>(), <span class="hljs-symbol">do:</span> <span class="hljs-symbol">:fail</span></code></pre>
+
+<p>In the second example, you have the problem of <a href="../wait-for-another-bot-to-finish-an-action">making one bot wait for
+another</a>. That is a full topic on its own, so see the linked post for full
+details.</p>
+<p>In general, try to avoid using <code>SharedData</code> as much as possible. It should only be
+used to read run time config, or in cases where your users would legitimately
+communicate with each other in a system other than the one under test (like emailing
+an invitation to a friend). Keep race conditions in mind by thinking about how many
+bots will be accessing <code>SharedData</code> at the same time.</p>
+
 
         <footer>
         </footer>
