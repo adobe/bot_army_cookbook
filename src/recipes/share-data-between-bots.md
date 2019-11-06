@@ -3,17 +3,29 @@ title: Share data between bots
 level: advanced
 ---
 
-Bots share data between _actions_ via the `context`. But how do you share data
-between different bots?
+Bots run independently, each with their own state. However, sometimes you might want
+to share data _between_ bots. How do you do that?
 
-The bot army provides a [`SharedData`][shared data] module just for this case. It
-works similar to the `get`/`put`/`update` features of `Map`, allowing you to define
-key value pairs in a global space. Also, any custom config [passed in] when you
-start your test will be available in `SharedData` to access in your actions or trees.
+One way is to use the system under test. For example, bots can make posts to a
+shared album and fetch new album content in a loop (or with a separate [syncing
+channel][sync]). But what if you want bots to share information directly?
+
+First off, make sure there is a legitimate real-world scenario where actual users
+would share data outside of your system under test. For example, using email or
+social media to send invites to contacts (or strangers). If this still applies you
+can use [`BotArmy.SharedData`][shared data] as a global mutable state accessible by
+all bots to `get`, `put` and `update` data.
+
+Be careful though, sharing data can cause all kinds of tricky concurrency problems
+(see below). I advise using `SharedData` sparingly!
+
+One exception is that it is OK to use `SharedData` to expose [run-time
+configuration][config] to your bots.
 
 ## Accessing custom config
 
-This is how you would set and use custom config:
+The test runners automatically preload `SharedData` with your run-time configuration.
+Here is an example:
 
 ```elixir
 # start your tests like this from the command line:
@@ -74,7 +86,7 @@ The logic here is correct. The problem is that all bots will run this tree at ab
 the same time, so they all will check `SharedData` for an invite at the same time,
 and they all will come up empty, so they all will go create an album and share the
 invite id. You just inadvertently created hundreds of albums and shared invites,
-with each bot in its own album.
+with each bot in its own album!
 
 Fixing this situation is difficult. `SharedData` doesn't have any kind of locking
 system built in. If you build one on your own, you will have created a single
@@ -108,13 +120,12 @@ In the second example, you have the problem of [making one bot wait for
 another][wait]. That is a full topic on its own, so see the linked post for full
 details.
 
-In general, try to avoid using `SharedData` as much as possible. It should only be
-used to read run time config, or in cases where your users would legitimately
-communicate with each other in a system other than the one under test (like emailing
-an invitation to a friend). Keep race conditions in mind by thinking about how many
-bots will be accessing `SharedData` at the same time.
+To reiterate, try to avoid using `SharedData` as much as possible aside from
+accessing config. Keep race conditions in mind by thinking about how many bots will
+be accessing `SharedData` at the same time.
 
+[sync]: ../use-websockets
 [shared data]: https://git.corp.adobe.com/pages/manticore/bot_army/BotArmy.SharedData.html#content
-[passed in]: https://git.corp.adobe.com/pages/manticore/bot_army/Mix.Tasks.Bots.LoadTest.html
+[config]: https://git.corp.adobe.com/pages/manticore/bot_army/Mix.Tasks.Bots.LoadTest.html
 [wait]: ../wait-for-another-bot-to-finish-an-action
 [start up times]: ../ramp-up-the-bot-count-over-time

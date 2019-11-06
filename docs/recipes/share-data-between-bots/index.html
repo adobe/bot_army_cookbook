@@ -20,14 +20,23 @@
       <h1>How do I...  Share data between bots?</h1>
     </header>
 
-    <p>Bots share data between <em>actions</em> via the <code>context</code>. But how do you share data
-between different bots?</p>
-<p>The bot army provides a <a href="https://git.corp.adobe.com/pages/manticore/bot_army/BotArmy.SharedData.html#content"><code>SharedData</code></a> module just for this case. It
-works similar to the <code>get</code>/<code>put</code>/<code>update</code> features of <code>Map</code>, allowing you to define
-key value pairs in a global space. Also, any custom config <a href="https://git.corp.adobe.com/pages/manticore/bot_army/Mix.Tasks.Bots.LoadTest.html">passed in</a> when you
-start your test will be available in <code>SharedData</code> to access in your actions or trees.</p>
+    <p>Bots run independently, each with their own state. However, sometimes you might want
+to share data <em>between</em> bots. How do you do that?</p>
+<p>One way is to use the system under test. For example, bots can make posts to a
+shared album and fetch new album content in a loop (or with a separate <a href="../use-websockets">syncing
+channel</a>). But what if you want bots to share information directly?</p>
+<p>First off, make sure there is a legitimate real-world scenario where actual users
+would share data outside of your system under test. For example, using email or
+social media to send invites to contacts (or strangers). If this still applies you
+can use <a href="https://git.corp.adobe.com/pages/manticore/bot_army/BotArmy.SharedData.html#content"><code>BotArmy.SharedData</code></a> as a global mutable state accessible by
+all bots to <code>get</code>, <code>put</code> and <code>update</code> data.</p>
+<p>Be careful though, sharing data can cause all kinds of tricky concurrency problems
+(see below). I advise using <code>SharedData</code> sparingly!</p>
+<p>One exception is that it is OK to use <code>SharedData</code> to expose <a href="https://git.corp.adobe.com/pages/manticore/bot_army/Mix.Tasks.Bots.LoadTest.html">run-time
+configuration</a> to your bots.</p>
 <h2 id="accessing-custom-config"><a class="heading-anchor" href="#accessing-custom-config"><i class="fas fa-link"></i></a>Accessing custom config</h2>
-<p>This is how you would set and use custom config:</p>
+<p>The test runners automatically preload <code>SharedData</code> with your run-time configuration.
+Here is an example:</p>
 <pre><code class="hljs elixir"><span class="hljs-comment"># start your tests like this from the command line:</span>
 <span class="hljs-comment"># mix bots.load_test --n 100 --tree &quot;MyBots.MyTree&quot; --custom &apos;[run_id: &quot;abc&quot;, num_albums: 20]&apos;</span>
 
@@ -76,7 +85,7 @@ concurrency challenges, such as race conditions and consistency issues.</p>
 the same time, so they all will check <code>SharedData</code> for an invite at the same time,
 and they all will come up empty, so they all will go create an album and share the
 invite id. You just inadvertently created hundreds of albums and shared invites,
-with each bot in its own album.</p>
+with each bot in its own album!</p>
 <p>Fixing this situation is difficult. <code>SharedData</code> doesn&apos;t have any kind of locking
 system built in. If you build one on your own, you will have created a single
 bottleneck that all bots must pass through, which can cause problems.</p>
@@ -104,11 +113,9 @@ Node.sequence([
 <p>In the second example, you have the problem of <a href="../wait-for-another-bot-to-finish-an-action">making one bot wait for
 another</a>. That is a full topic on its own, so see the linked post for full
 details.</p>
-<p>In general, try to avoid using <code>SharedData</code> as much as possible. It should only be
-used to read run time config, or in cases where your users would legitimately
-communicate with each other in a system other than the one under test (like emailing
-an invitation to a friend). Keep race conditions in mind by thinking about how many
-bots will be accessing <code>SharedData</code> at the same time.</p>
+<p>To reiterate, try to avoid using <code>SharedData</code> as much as possible aside from
+accessing config. Keep race conditions in mind by thinking about how many bots will
+be accessing <code>SharedData</code> at the same time.</p>
 
 
         <footer>
