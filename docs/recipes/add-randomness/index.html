@@ -1,0 +1,195 @@
+  <!DOCTYPE html>
+  <html lang="en">
+    <head>
+      <meta charset="UTF-8" />
+      <title>Bot Army Cookbook - Add randomness</title>
+      <meta name="description" content="Tips, Tricks, and Recipes for Building Effective Bots" />
+      <script src="http://localhost:35729/livereload.js"></script>
+      <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.7.0/styles/atom-one-dark.min.css" />
+      <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/5.11.2/css/all.min.css" />
+      <link rel="stylesheet" href="../../styles.css">
+      <script src="https://unpkg.com/lunr/lunr.js"></script>
+      <link rel="stylesheet" href="https://use.typekit.net/cdl6wid.css">
+      <meta name="viewport" content="width=device-width, initial-scale=1">
+    </head>
+  
+    <body class="text-gray-600">
+      <div id="content" class="container mx-auto py-8 px-8 lg:px-32 xl:px-64">
+        <header class="mb-3">
+      <a class="inline-block mb-2 no-underline text-gray-500 hover:text-steelblue" href="../../">&larr; Bot Army Cookbook</a>
+      <h1>How do I...  Add randomness?</h1>
+    </header>
+
+    <p>The bot army is meant to imitate <em>real</em> users, but what good is it if each bot is
+doing the exact same thing? If each bot uses the same behavior tree template, how do
+you make each bot act uniquely? The answer, obviously, is to include a little
+randomness in your bots.</p>
+<p>The bot army gives you quite a few ways to do this.</p>
+<h2 id="generating-random-values"><a class="heading-anchor" href="#generating-random-values"><i class="fas fa-link"></i></a>Generating random values</h2>
+<p>First off, you&apos;ll probably need a way to generate random data so that all of your
+write actions will be unique. Elixir has two main ways of doing this. You can get a
+random value between 1 and n (inclusive) with <code>:rand.uniform(n)</code> (this looks a little
+weird because it is actually Erlang), and you can choose a random element from a list
+with <code>Enum.random([1,2,3,4])</code> (<code>Enum.random(1..4)</code> is equivalent).</p>
+<p>Here is a quick and dirty random string generator that makes random strings of random
+lengths.</p>
+<pre><code class="hljs elixir"><span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">random_string</span></span>(length \\ <span class="hljs-symbol">:rand</span>.uniform(<span class="hljs-number">100</span>)) <span class="hljs-keyword">do</span>
+  <span class="hljs-keyword">fn</span> -&gt; Enum.random(?a..?z) <span class="hljs-keyword">end</span>
+  |&gt; Stream.repeatedly()
+  |&gt; Enum.take(n)
+  |&gt; to_string()
+<span class="hljs-keyword">end</span></code></pre>
+
+<p>You may want to look into the <a href="https://hexdocs.pm/stream_data/StreamData.html">StreamData</a> library for more (and better) random value
+generators. Remember that you can use <a href="../set-default-values/">default parameters</a> as a good place to use
+random values.</p>
+<h2 id="compile-time-vs-run-time-considerations"><a class="heading-anchor" href="#compile-time-vs-run-time-considerations"><i class="fas fa-link"></i></a>Compile-time vs. run-time considerations</h2>
+<p>When using random functions, you need to be careful to know if that function will run
+every time you think it will. Depending on where a random function is in your code,
+it might only get ran once at compile time, or it might get ran each time the
+execution path reaches it. Here are some examples:</p>
+<pre><code class="hljs elixir"><span class="hljs-comment"># in helpers</span>
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">get_random_number</span></span>, <span class="hljs-symbol">do:</span> <span class="hljs-symbol">:rand</span>.unique(<span class="hljs-number">10</span>)
+
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">tree</span></span> <span class="hljs-keyword">do</span>
+  random_1 = <span class="hljs-symbol">:rand</span>.unique(<span class="hljs-number">10</span>)
+  <span class="hljs-comment"># functionally equivalent:</span>
+  random_2 = get_random_number()
+
+  Node.repeat_n(
+    random_1,
+    Node.sequence([
+      action(BotArmy.Actions, <span class="hljs-symbol">:log</span>, [random_2]),
+      action(MyActions, <span class="hljs-symbol">:log_a_random_number</span>),
+      action(MyActions, <span class="hljs-symbol">:log_n_or_random_number</span>),
+      action(BotArmy.Actions, <span class="hljs-symbol">:wait</span>, [get_random_number()]),
+      action(BotArmy.Actions, <span class="hljs-symbol">:wait</span>, [<span class="hljs-number">0</span>, <span class="hljs-number">10</span>])
+    ])
+  )
+<span class="hljs-keyword">end</span>
+
+<span class="hljs-comment"># in actions</span>
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">log_a_random_number</span></span>(_context) <span class="hljs-keyword">do</span>
+  random_3 = get_random_number()
+  Logger.info(random_3)
+<span class="hljs-keyword">end</span>
+
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">log_n_or_random_number</span></span>(_context, n \\ get_random_number()) <span class="hljs-keyword">do</span>
+  Logger.info(n)
+<span class="hljs-keyword">end</span></code></pre>
+
+<p>A bot&apos;s tree only gets ran once, so <code>random_1</code> and <code>random_2</code> will only get set to a
+random number once (per bot). This means the first <code>:log</code> action will log the same
+random number each time it loops.</p>
+<p><code>:log_a_random_number</code> will log a different number each time because it gets called
+every time the bot enters that action. The same goes for <code>:log_n_or_random_number</code>
+(remember that default parameters get executed if needed each time their function is
+executed).</p>
+<p>The first <code>:wait</code> will wait the same time every loop (remember the tree definition
+does not call any actions, it only describes how to call them, which means the
+arguments get evaluated when the tree gets evaluated).</p>
+<p>By contrast, the second <code>:wait</code> will have a different wait time every loop, because
+the random selection within that range happens in the action.</p>
+<h2 id="randomizing-the-trees"><a class="heading-anchor" href="#randomizing-the-trees"><i class="fas fa-link"></i></a>Randomizing the trees</h2>
+<p>Making each bot do different things at different times, is where behavior trees
+really shine.</p>
+<p>You can use <a href="https://hexdocs.pm/behavior_tree/BehaviorTree.Node.html#random/1"><code>Node.random</code></a> and <a href="https://hexdocs.pm/behavior_tree/BehaviorTree.Node.html#random_weighted/1"><code>Node.random_weighted</code></a> to give bots a chance to
+&quot;choose&quot; which subtree to enter.</p>
+<p>A good pattern for creating real-user-like bots is to build a tree that logs in, then
+enters a continual loop that switches between various subtrees. You can gate those
+subtrees to check for required conditions, and you can make each subtree loop for a
+while before bouncing back up.</p>
+<p>In order to make each subtree repeat, you could use a fixed number in
+<code>Node.repeat_n</code>, or you could supply a random n as noted above. You can also use
+<a href="https://git.corp.adobe.com/pages/manticore/bot_army/BotArmy.Actions.html#succeed_rate/2"><code>BotArmy.Actions.succeed_rate</code></a> to randomize the chance to loop again.
+For example, a succeed rate of 0.75 would &quot;choose&quot; to loop three out of four times on
+average. This might seem unintuitive, especially if you are trying to control the
+number of loops. It helps to think of it as looking at a real user who has just
+finished one type of action, and guessing what the likelihood is that that user would
+decide to do the same type of action again.</p>
+<p>Tweaking all of these approaches is what will make your bots feel organic. Consider
+how your real users decide what to do next. Remember that real users are a lot
+slower than bots, so add appropriate random &quot;idle&quot; periods. And don&apos;t forget to also
+have your bots check the state of the world periodically to respond to new data
+instead of pure randomness.</p>
+<p>Here is an example of all of these techniques:</p>
+<pre><code class="hljs elixir"><span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">tree</span></span> <span class="hljs-keyword">do</span>
+  Node.sequence([
+    log_in_tree(),
+    <span class="hljs-comment"># Main loop</span>
+    Node.repeat_until_fail(
+      Node.sequence([
+        <span class="hljs-comment"># Check high priority actions first, but move on regardless of outcome</span>
+        Node.always_succeed(check_for_and_respond_to_new_notifications_tree()),
+        <span class="hljs-comment"># We don&apos;t want the outcome of any subtree to break the main loop</span>
+        Node.always_succeed(
+          Node.random_weighted([
+            {read_some_posts_tree(), <span class="hljs-number">10</span>},
+            {make_some_replies_tree(), <span class="hljs-number">5</span>},
+            {start_a_new_post_tree(), <span class="hljs-number">2</span>},
+            <span class="hljs-comment"># Go &quot;idle&quot; for up to 5 minutes</span>
+            {action(BotArmy.Actions, <span class="hljs-symbol">:wait</span>, [<span class="hljs-number">0</span>, <span class="hljs-number">60</span> * <span class="hljs-number">5</span>]), <span class="hljs-number">1</span>}
+          ])
+        ),
+        <span class="hljs-comment"># take a short breather (up to 10 seconds)</span>
+        action(BotArmy.Actions, <span class="hljs-symbol">:wait</span>, [<span class="hljs-number">0</span>, <span class="hljs-number">10</span>]),
+        <span class="hljs-comment"># Maybe log out (5% of the time)</span>
+        <span class="hljs-comment"># This is the only outcome that can exit main loop</span>
+        <span class="hljs-comment"># We negate the outcome because if logout succeeds, we need to fail in order</span>
+        <span class="hljs-comment"># to exit the loop, but if log out fails, we need to succeed to keep looping</span>
+        Node.negate(
+          Node.sequence([
+            action(BotArmy.Actions, <span class="hljs-symbol">:succeed_rate</span>, [<span class="hljs-number">0</span>.<span class="hljs-number">05</span>]),
+            action(User, <span class="hljs-symbol">:log_out</span>)
+          ])
+        )
+      ])
+    )
+  ])
+<span class="hljs-keyword">end</span>
+
+<span class="hljs-comment"># example subtree</span>
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">make_some_replies_tree</span></span>() <span class="hljs-keyword">do</span>
+  Node.repeat_until_fail(
+    Node.sequence([
+      <span class="hljs-comment"># leave subtree right away if it isn&apos;t actionable</span>
+      action(Posts, <span class="hljs-symbol">:do_any_exist?</span>),
+      action(Posts, <span class="hljs-symbol">:select_random_post</span>),
+      action(Posts, <span class="hljs-symbol">:reply_to_selected_post</span>),
+      <span class="hljs-comment"># take a breath</span>
+      action(BotArmy.Actions, <span class="hljs-symbol">:wait</span>, [<span class="hljs-number">5</span>]),
+      <span class="hljs-comment"># loop 70% of the time</span>
+      action(BotArmy.Actions, <span class="hljs-symbol">:succeed_rate</span>, [<span class="hljs-number">0</span>.<span class="hljs-number">7</span>])
+    ])
+  )
+<span class="hljs-keyword">end</span></code></pre>
+
+<h2 id="repeatability"><a class="heading-anchor" href="#repeatability"><i class="fas fa-link"></i></a>Repeatability</h2>
+<p>Random is great, but you might be concerned about being able to repeat a specific
+test run exactly. Luckily, the random functions described above all work off of a
+seed, so if you supply a (random) seed at runtime, you can repeat the tests by using
+the same seed:</p>
+<pre><code class="hljs elixir"><span class="hljs-comment"># set a seed before doing any random calls</span>
+<span class="hljs-symbol">:rand</span>.seed(<span class="hljs-symbol">:exsplus</span>, {<span class="hljs-number">1</span>, <span class="hljs-number">2</span>, <span class="hljs-number">3</span>})
+Enum.map(<span class="hljs-number">1</span>..<span class="hljs-number">5</span>, <span class="hljs-keyword">fn</span> <span class="hljs-number">_</span> -&gt; <span class="hljs-symbol">:rand</span>.uniform(<span class="hljs-number">10</span>) <span class="hljs-keyword">end</span>)
+<span class="hljs-comment"># [4, 3, 8, 1, 6]</span>
+
+<span class="hljs-comment"># if you use the seed again, you get the same results</span>
+<span class="hljs-symbol">:rand</span>.seed(<span class="hljs-symbol">:exsplus</span>, {<span class="hljs-number">1</span>, <span class="hljs-number">2</span>, <span class="hljs-number">3</span>})
+Enum.map(<span class="hljs-number">1</span>..<span class="hljs-number">5</span>, <span class="hljs-keyword">fn</span> <span class="hljs-number">_</span> -&gt; <span class="hljs-symbol">:rand</span>.uniform(<span class="hljs-number">10</span>) <span class="hljs-keyword">end</span>)
+<span class="hljs-comment"># [4, 3, 8, 1, 6]</span>
+
+<span class="hljs-comment"># a different seed gives different results</span>
+<span class="hljs-symbol">:rand</span>.seed(<span class="hljs-symbol">:exsplus</span>, {<span class="hljs-number">9</span>, <span class="hljs-number">9</span>, <span class="hljs-number">9</span>})
+Enum.map(<span class="hljs-number">1</span>..<span class="hljs-number">5</span>, <span class="hljs-keyword">fn</span> <span class="hljs-number">_</span> -&gt; <span class="hljs-symbol">:rand</span>.uniform(<span class="hljs-number">10</span>) <span class="hljs-keyword">end</span>)
+<span class="hljs-comment"># [9, 10, 3, 4, 8]</span></code></pre>
+
+<p>Keep in mind that external factors that you can&apos;t control (like the state of the
+system under test, or latency in your requests) might also affect your tests, even if
+the random generator is doing the same thing.</p>
+
+
+        <footer>
+        </footer>
+      </body>
+    </html>
