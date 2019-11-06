@@ -1,6 +1,6 @@
 ---
 title: Add randomness
-level: intermediate
+level: advanced
 ---
 
 The bot army is meant to imitate _real_ users, but what good is it if each bot is
