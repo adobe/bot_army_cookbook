@@ -20,8 +20,44 @@
       <h1>How do I...  Use different trees for different bots?</h1>
     </header>
 
-    <pre><code>- percentage based using root level random_weighted
-</code></pre>
+    <p>When running multiple bots simultaneously, such as in a load test, a common question
+is the relationship between bots and behavior trees. Here is the break down: your
+test run will have many bots, but only one tree describing how the bots should
+behave. Each bot is an individual &quot;instance&quot; of the same tree.</p>
+<p>You might be inclined to want to be able to assign different trees to different bots,
+such as having some bots that are &quot;read only&quot; and some that are &quot;write only.&quot;</p>
+<p>You can&apos;t do this directly, but it is not hard to get the same result by describing
+what you want at the root level of your tree:</p>
+<pre><code class="hljs elixir"><span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">tree</span></span> <span class="hljs-keyword">do</span>
+  Node.random_weighted([
+    {write_tree(), <span class="hljs-number">1</span>},
+    {read_tree(), <span class="hljs-number">4</span>}
+  ])
+<span class="hljs-keyword">end</span>
+
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">write_tree</span></span>() <span class="hljs-keyword">do</span>
+  Node.repeat_until_fail(
+    Node.always_succeed(
+      Node.sequence([
+        ...
+      ])
+    )
+  )
+<span class="hljs-keyword">end</span>
+
+<span class="hljs-comment"># read_tree is similar</span></code></pre>
+
+<p>In this example, for every five bots, one of them will &quot;choose&quot; the write tree and
+four of them will choose the read tree (approximately, it is random). Once a bot has
+&quot;chosen&quot; a path, it will loop in that sub tree forever (until it dies).</p>
+<p>While this is a useful pattern, think twice before doing something so &quot;contrived.&quot;
+Consider if the behavior you are creating represents real user behavior. If you are
+trying to do a brute force performance test, this might be useful, but in the real
+world users don&apos;t segregate this way. Some users might be more read or write heavy,
+but they usually will alternate between varying durations of reading and writing
+different types of content. You can more accurately model this with a well crafted
+tree that <a href="../use-random-values">randomly</a> yet fluidly transitions between various sub trees.</p>
+
 
         <footer>
         </footer>
