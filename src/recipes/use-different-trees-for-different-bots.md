@@ -47,4 +47,4 @@ but they usually will alternate between varying durations of reading and writing
 different types of content. You can more accurately model this with a well crafted
 tree that [randomly] yet fluidly transitions between various sub trees.
 
-[randomly]: ../use-random-values
+[randomly]: ../add-randomness

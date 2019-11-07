@@ -16,6 +16,7 @@ var msIf = require("metalsmith-if");
 var rootPath = require("metalsmith-rootpath");
 var lunr = require("metalsmith-lunr");
 var headingsidentifier = require("metalsmith-headings-identifier");
+var blc = require("metalsmith-broken-link-checker");
 
 const isDev = process.argv.indexOf("--dev") >= 0;
 const port = 8000;
@@ -109,6 +110,14 @@ Metalsmith(__dirname)
             default: "recipe.hbs",
             pattern: "**/*.html",
             engine: "handlebars"
+        })
+    )
+    .use(
+        blc({
+            checkAnchors: true,
+            write_to_file: true,
+            warn: true,
+            allowRedirects: true
         })
     )
     .build(function(err, files) {
