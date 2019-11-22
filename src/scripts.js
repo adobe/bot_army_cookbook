@@ -52,7 +52,7 @@ function doSearch(idx, term) {
 function resultTemplate({ path, title }) {
     return `<h4 class="flex items-center p-2 hover:bg-gray-100 rounded">
               <i class="fas fa-robot text-steelblue mr-3"></i>
-              <a class="hover:text-shadow-lg hover:no-underline font-display text-3xl font-bold text-steelblue text-shadow no-underline" href="./${path}">${title}</a>
+              <a class="hover:text-shadow-lg hover:no-underline font-display text-3xl font-bold text-steelblue text-shadow no-underline" href="./${path.slice(0, -10)}">${title}</a>
             </h4>`;
 }
 
