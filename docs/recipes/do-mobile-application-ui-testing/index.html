@@ -1,0 +1,213 @@
+  <!DOCTYPE html>
+  <html lang="en">
+    <head>
+      <meta charset="UTF-8" />
+      <title>Bot Army Cookbook - Do mobile application UI testing</title>
+      <meta name="description" content="Tips, Tricks, and Recipes for Building Effective Bots" />
+      <script src="http://localhost:35729/livereload.js"></script>
+      <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.7.0/styles/atom-one-dark.min.css" />
+      <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/5.11.2/css/all.min.css" />
+      <link rel="stylesheet" href="../../styles.css">
+      <script src="https://unpkg.com/lunr/lunr.js"></script>
+      <link rel="stylesheet" href="https://use.typekit.net/cdl6wid.css">
+      <meta name="viewport" content="width=device-width, initial-scale=1">
+    </head>
+  
+    <body class="text-gray-600">
+      <div id="content" class="container mx-auto py-8 px-8 lg:px-32 xl:px-64">
+        <header class="mb-3">
+      <a class="inline-block mb-2 no-underline text-gray-500 hover:text-steelblue" href="../../">&larr; Bot Army Cookbook</a>
+      <h1>How do I...  Do mobile application UI testing?</h1>
+    </header>
+
+    <p>The bots can test your mobile applications by using <a href="http://appium.io/docs/en/about-appium/intro/?lang=en">Appium</a>, a standard tool similar
+to <a href="https://selenium.dev/">Selenium</a>, used to test mobile applications via their built in accessibility
+constructs. Both Appium and Selenium work as simple HTTP servers exposing the
+standardized <a href="https://w3c.github.io/webdriver/">WebDriver specification</a>. Appium adds additional endpoints for mobile
+specific needs.</p>
+<p>Using Appium is a simple as starting an Appium server (see their docs), then making
+HTTP requests against that server using the WebDriver protocol. Appium has libraries
+in many different languages to facilitate this process. Unfortunately, at this time,
+it does not have a client library written for Elixir. You can <em>almost</em> use one of the
+web automation clients (like Hound), but that doesn&apos;t quite work. Making it support
+Appium would not be a huge effort, so perhaps that will exist in the future. In the
+meantime, making HTTP requests directly is a simple alternative.</p>
+<p>In my experiments, I found that creating a minimal Appium HTTP wrapper using
+<a href="https://hexdocs.pm/httpoison/readme.html#wrapping-httpoison-base">HTTPoison.Base</a> gets me 80% of the way towards a simple way of calling Appium.
+Below is an example of such a wrapper:</p>
+<pre><code class="hljs elixir"><span class="hljs-class"><span class="hljs-keyword">defmodule</span> <span class="hljs-title">Drivers.AppiumAPI</span></span> <span class="hljs-keyword">do</span>
+  <span class="hljs-variable">@moduledoc</span> <span class="hljs-string">&quot;&quot;</span><span class="hljs-string">&quot;
+  Wrapper for appium http api
+
+  See http://appium.io/docs/en/commands/status/ (and other commands dropdown) and
+  https://w3c.github.io/webdriver/
+  &quot;</span><span class="hljs-string">&quot;&quot;</span>
+
+  <span class="hljs-keyword">use</span> HTTPoison.Base
+  <span class="hljs-keyword">require</span> Logger
+
+  <span class="hljs-comment"># This is the standard appium port and path prefix</span>
+  <span class="hljs-variable">@base_url</span> <span class="hljs-string">&quot;http://localhost:4723/wd/hub&quot;</span>
+
+  <span class="hljs-comment"># These headers are required</span>
+  <span class="hljs-variable">@default_headers</span> [{<span class="hljs-string">&quot;Content-Type&quot;</span>, <span class="hljs-string">&quot;application/json&quot;</span>}, {<span class="hljs-string">&quot;charset&quot;</span>, <span class="hljs-string">&quot;UTF-8&quot;</span>}]
+
+  <span class="hljs-variable">@impl</span> HTTPoison.Base
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">process_url</span></span>(path), <span class="hljs-symbol">do:</span> <span class="hljs-variable">@base_url</span> &lt;&gt; path
+
+  <span class="hljs-variable">@impl</span> HTTPoison.Base
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">process_request_headers</span></span>(headers), <span class="hljs-symbol">do:</span> <span class="hljs-variable">@default_headers</span> ++ headers
+
+  <span class="hljs-variable">@impl</span> HTTPoison.Base
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">process_request_options</span></span>(options), <span class="hljs-symbol">do:</span> [<span class="hljs-symbol">recv_timeout:</span> <span class="hljs-number">60_000</span>] ++ options
+
+  <span class="hljs-variable">@impl</span> HTTPoison.Base
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">process_response_body</span></span>(body) <span class="hljs-keyword">do</span>
+    <span class="hljs-keyword">case</span> Jason.decode(body) <span class="hljs-keyword">do</span>
+      {<span class="hljs-symbol">:ok</span>, %{<span class="hljs-string">&quot;status&quot;</span> =&gt; <span class="hljs-number">0</span>} = res} -&gt;
+        {<span class="hljs-symbol">:ok</span>, res}
+
+      {<span class="hljs-symbol">:ok</span>, res} -&gt;
+        {<span class="hljs-symbol">:error</span>, res}
+
+      e -&gt;
+        e
+    <span class="hljs-keyword">end</span>
+  <span class="hljs-keyword">end</span>
+
+  <span class="hljs-variable">@doc</span> <span class="hljs-string">&quot;&quot;</span><span class="hljs-string">&quot;
+  Use this for specific GET apis.  Make sure the path includes the session id if needed.
+  &quot;</span><span class="hljs-string">&quot;&quot;</span>
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">do_get</span></span>(path), <span class="hljs-symbol">do:</span> get(path) |&gt; handle_response
+
+  <span class="hljs-variable">@doc</span> <span class="hljs-string">&quot;&quot;</span><span class="hljs-string">&quot;
+  Use this for specific POST apis.  Make sure the path includes the session id if needed.
+  &quot;</span><span class="hljs-string">&quot;&quot;</span>
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">do_post</span></span>(path, body, opts \\ []),
+    <span class="hljs-symbol">do:</span> post(path, Jason.encode!(body), [], opts) |&gt; handle_response
+
+  <span class="hljs-variable">@doc</span> <span class="hljs-string">&quot;&quot;</span><span class="hljs-string">&quot;
+  A helper to find an element
+  &quot;</span><span class="hljs-string">&quot;&quot;</span>
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">find</span></span>(session_id, {using, value}) <span class="hljs-keyword">do</span>
+    body = %{
+      <span class="hljs-symbol">using:</span> using,
+      <span class="hljs-symbol">value:</span> value
+    }
+
+    <span class="hljs-keyword">case</span> do_post(<span class="hljs-string">&quot;/session/<span class="hljs-subst">#{session_id}</span>/element&quot;</span>, body) <span class="hljs-keyword">do</span>
+      {<span class="hljs-symbol">:ok</span>, %{<span class="hljs-string">&quot;value&quot;</span> =&gt; %{<span class="hljs-string">&quot;ELEMENT&quot;</span> =&gt; element_id}}} -&gt; {<span class="hljs-symbol">:ok</span>, element_id}
+      {<span class="hljs-symbol">:ok</span>, e} -&gt; {<span class="hljs-symbol">:error</span>, e}
+      e -&gt; e
+    <span class="hljs-keyword">end</span>
+  <span class="hljs-keyword">end</span>
+
+  <span class="hljs-variable">@doc</span> <span class="hljs-string">&quot;&quot;</span><span class="hljs-string">&quot;
+  A helper to click an element (pass the selector to use)
+  &quot;</span><span class="hljs-string">&quot;&quot;</span>
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">click</span></span>(session_id, {using, value}) <span class="hljs-keyword">do</span>
+    <span class="hljs-keyword">with</span> {<span class="hljs-symbol">:ok</span>, element_id} &lt;- find(session_id, {using, value}),
+         {<span class="hljs-symbol">:ok</span>, <span class="hljs-number">_</span>} &lt;- do_post(<span class="hljs-string">&quot;/session/<span class="hljs-subst">#{session_id}</span>/element/<span class="hljs-subst">#{element_id}</span>/click&quot;</span>, %{}) <span class="hljs-keyword">do</span>
+      <span class="hljs-symbol">:ok</span>
+    else
+      e -&gt;
+        Logger.error(inspect(e, <span class="hljs-symbol">pretty:</span> <span class="hljs-keyword">true</span>))
+        e
+    <span class="hljs-keyword">end</span>
+  <span class="hljs-keyword">end</span>
+
+  <span class="hljs-comment"># TODO add other semantic api wrappers here...</span>
+
+  <span class="hljs-function"><span class="hljs-keyword">defp</span> <span class="hljs-title">handle_response</span></span>(response) <span class="hljs-keyword">do</span>
+    <span class="hljs-keyword">case</span> response <span class="hljs-keyword">do</span>
+      {<span class="hljs-symbol">:ok</span>, %HTTPoison.Response{<span class="hljs-symbol">status_code:</span> <span class="hljs-number">200</span>, <span class="hljs-symbol">body:</span> {<span class="hljs-symbol">:ok</span>, value}}} -&gt;
+        {<span class="hljs-symbol">:ok</span>, value}
+
+      {<span class="hljs-symbol">:ok</span>, %HTTPoison.Response{<span class="hljs-symbol">status_code:</span> <span class="hljs-number">200</span>, <span class="hljs-symbol">body:</span> body}} -&gt;
+        Logger.error(inspect(body, <span class="hljs-symbol">pretty:</span> <span class="hljs-keyword">true</span>))
+        body
+
+      {<span class="hljs-symbol">:ok</span>, %HTTPoison.Response{<span class="hljs-symbol">status_code:</span> <span class="hljs-number">_</span>} = res} -&gt;
+        Logger.error(inspect(res, <span class="hljs-symbol">pretty:</span> <span class="hljs-keyword">true</span>))
+        {<span class="hljs-symbol">:error</span>, res}
+
+      e -&gt;
+        Logger.error(inspect(e, <span class="hljs-symbol">pretty:</span> <span class="hljs-keyword">true</span>))
+        e
+    <span class="hljs-keyword">end</span>
+  <span class="hljs-keyword">end</span>
+<span class="hljs-keyword">end</span></code></pre>
+
+<p>You can call the wrapper from your actions like this:</p>
+<pre><code class="hljs elixir"><span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">start_session</span></span>(_context) <span class="hljs-keyword">do</span>
+  app_path =
+    <span class="hljs-string">&quot;/full/path/to/the/app/file&quot;</span>
+
+  <span class="hljs-comment"># adjust these as needed based on your testing target</span>
+  <span class="hljs-comment"># see http://appium.io/docs/en/about-appium/getting-started/index.html</span>
+  body = %{
+    <span class="hljs-symbol">desiredCapabilities:</span> %{
+      <span class="hljs-symbol">app:</span> app_path,
+      <span class="hljs-symbol">automationName:</span> <span class="hljs-string">&quot;UiAutomator2&quot;</span>,
+      <span class="hljs-symbol">platformName:</span> <span class="hljs-string">&quot;Android&quot;</span>,
+      <span class="hljs-symbol">platformVersion:</span> <span class="hljs-string">&quot;10&quot;</span>,
+      <span class="hljs-symbol">deviceName:</span> <span class="hljs-string">&quot;Nexus 5X API 29 x86&quot;</span>,
+      <span class="hljs-symbol">appPackage:</span> <span class="hljs-string">&quot;com.yourorg.yourapp&quot;</span>,
+      <span class="hljs-symbol">appActivity:</span> <span class="hljs-string">&quot;com.yourorg.yourapp.youractivity&quot;</span>
+      <span class="hljs-symbol">newCommandTimeout:</span> <span class="hljs-number">60</span> * <span class="hljs-number">5</span>
+    }
+  }
+
+  IO.puts(<span class="hljs-string">&quot;\nUsing capabilities:&quot;</span> &lt;&gt; Jason.encode!(body))
+
+  <span class="hljs-comment"># The timeout needs to be really big because it takes forever to start up the</span>
+  <span class="hljs-comment"># simulator</span>
+  <span class="hljs-keyword">case</span> Drivers.AppiumAPI.do_post(<span class="hljs-string">&quot;/session&quot;</span>, body) <span class="hljs-keyword">do</span>
+      {<span class="hljs-symbol">:ok</span>, %{<span class="hljs-string">&quot;sessionId&quot;</span> =&gt; id}} -&gt;
+        {<span class="hljs-symbol">:succeed</span>, <span class="hljs-symbol">session_id:</span> id}
+
+    <span class="hljs-number">_</span> -&gt;
+      <span class="hljs-symbol">:fail</span>
+  <span class="hljs-keyword">end</span>
+<span class="hljs-keyword">end</span>
+
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">open_menu</span></span>(%{<span class="hljs-symbol">session_id:</span> session_id}) <span class="hljs-keyword">do</span>
+  menu_selector = {<span class="hljs-string">&quot;xpath&quot;</span>, <span class="hljs-string">&quot;menuid&quot;</span>}
+
+  <span class="hljs-keyword">case</span> Drivers.AppiumAPI.click(session_id, menu_selector), <span class="hljs-keyword">do</span>
+    <span class="hljs-symbol">:ok</span> -&gt;
+      <span class="hljs-symbol">:succeed</span>
+
+    <span class="hljs-number">_</span> -&gt;
+      <span class="hljs-symbol">:fail</span>
+  <span class="hljs-keyword">end</span>
+<span class="hljs-keyword">end</span>
+
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">validate_menu_text</span></span>(%{<span class="hljs-symbol">session_id:</span> session_id}, expected_text) <span class="hljs-keyword">do</span>
+  menu_selector = {<span class="hljs-string">&quot;xpath&quot;</span>, <span class="hljs-string">&quot;menuid&quot;</span>}
+
+  <span class="hljs-keyword">with</span> {<span class="hljs-symbol">:ok</span>, element_id} &lt;- Drivers.AppiumAPI.find(session_id, menu_selector),
+       {<span class="hljs-symbol">:ok</span>, %{<span class="hljs-string">&quot;value&quot;</span> =&gt; actual_text}} <span class="hljs-keyword">when</span> actual_text == expected_text &lt;-
+         Drivers.AppiumAPI.do_post(<span class="hljs-string">&quot;/session/<span class="hljs-subst">#{session_id}</span>/element/<span class="hljs-subst">#{element_id}</span>/text&quot;</span>, %{}) <span class="hljs-keyword">do</span>
+    <span class="hljs-symbol">:succeed</span>
+  else
+    e -&gt;
+      Logger.error(inspect(e, <span class="hljs-symbol">pretty:</span> <span class="hljs-keyword">true</span>))
+      <span class="hljs-symbol">:fail</span>
+  <span class="hljs-keyword">end</span>
+<span class="hljs-keyword">end</span></code></pre>
+
+<p>You can see the full Appium API by browsing the &quot;Commands&quot; menu drop-down on their
+documentation linked above. Also be sure to get the session configuration correct,
+otherwise you won&apos;t be able to start a session. Also, the Appium Desktop application
+is a useful tool to visualy find the proper selectors for any element. Finally see
+the tips for <a href="../do-browser-ui-testing/">browser UI testing</a>.</p>
+<p>To run your tests, make sure the Appium server is running, and either the actual
+device or simulator you wish to test on is configured and ready according to their
+documentation, then run your bot tests as normal.</p>
+
+
+        <footer>
+        </footer>
+      </body>
+    </html>
