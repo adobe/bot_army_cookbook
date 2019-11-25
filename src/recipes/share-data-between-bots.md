@@ -125,7 +125,7 @@ accessing config. Keep race conditions in mind by thinking about how many bots w
 be accessing `SharedData` at the same time.
 
 [sync]: ../use-websockets
-[shared data]: https://git.corp.adobe.com/pages/manticore/bot_army/BotArmy.SharedData.html#content
-[config]: https://git.corp.adobe.com/pages/manticore/bot_army/Mix.Tasks.Bots.LoadTest.html
+[shared data]: https://git.corp.adobe.com/pages/BotTestingFramework/bot_army/BotArmy.SharedData.html#content
+[config]: https://git.corp.adobe.com/pages/BotTestingFramework/bot_army/Mix.Tasks.Bots.LoadTest.html
 [wait]: ../wait-for-another-bot-to-finish-an-action
 [start up times]: ../ramp-up-the-bot-count-over-time

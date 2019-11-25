@@ -74,7 +74,7 @@ else
 <p>The simplest response to an error is to crash the bot. This happens automatically
 when an error is thrown. You can also crash the bot from an action by returning
 <code>{:error, &quot;Error reason...&quot;}</code>. Or you can do so from the tree with
-<a href="https://git.corp.adobe.com/pages/manticore/bot_army/BotArmy.Actions.html#error/2"><code>BotArmy.Actions.error</code></a>.</p>
+<a href="https://git.corp.adobe.com/pages/BotTestingFramework/bot_army/BotArmy.Actions.html#error/2"><code>BotArmy.Actions.error</code></a>.</p>
 <p>Crashing a bot isn&apos;t always the best option. One main benefit of behavior trees is
 the ability to respond to feedback and try a different action. For this reason, you
 should almost always return <code>:fail</code> instead of <code>{:error, reason}</code> in your actions.

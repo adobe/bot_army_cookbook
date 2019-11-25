@@ -30,7 +30,8 @@ Metalsmith(__dirname)
     .metadata({
         title: "Bot Army Cookbook",
         description: "Tips, Tricks, and Recipes for Building Effective Bots",
-        url: "https://git.corp.adobe.com/pages/manticore/bot_army_cookbook/",
+        url:
+      "https://git.corp.adobe.com/pages/BotTestingFramework/bot_army_cookbook/",
         isDev: isDev
     })
     .clean(true)

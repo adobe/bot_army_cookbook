@@ -39,7 +39,7 @@ makes sense, but the problem is that if your action errors, the bot will die
 immediately. You might want to use the action in a different way where you have a
 fallback action if it doesn&apos;t work, but you won&apos;t be able to if the first one errors.</p>
 <p>It is better to always <code>:fail</code>. You can always wrap it in a <code>Node.select</code> and follow
-it with <a href="https://git.corp.adobe.com/pages/manticore/bot_army/BotArmy.Actions.html#error/2"><code>BotArmy.Action.error</code></a>. This way you can decide if the bot should
+it with <a href="https://git.corp.adobe.com/pages/BotTestingFramework/bot_army/BotArmy.Actions.html#error/2"><code>BotArmy.Action.error</code></a>. This way you can decide if the bot should
 die
 at the tree level, instead of the action level.</p>
 <h2 id="be-careful-about-side-effects"><a class="heading-anchor" href="#be-careful-about-side-effects"><i class="fas fa-link"></i></a>Be careful about side effects</h2>

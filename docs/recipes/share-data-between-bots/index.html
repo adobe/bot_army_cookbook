@@ -28,11 +28,11 @@ channel</a>). But what if you want bots to share information directly?</p>
 <p>First off, make sure there is a legitimate real-world scenario where actual users
 would share data outside of your system under test. For example, using email or
 social media to send invites to contacts (or strangers). If this still applies you
-can use <a href="https://git.corp.adobe.com/pages/manticore/bot_army/BotArmy.SharedData.html#content"><code>BotArmy.SharedData</code></a> as a global mutable state accessible by
+can use <a href="https://git.corp.adobe.com/pages/BotTestingFramework/bot_army/BotArmy.SharedData.html#content"><code>BotArmy.SharedData</code></a> as a global mutable state accessible by
 all bots to <code>get</code>, <code>put</code> and <code>update</code> data.</p>
 <p>Be careful though, sharing data can cause all kinds of tricky concurrency problems
 (see below). I advise using <code>SharedData</code> sparingly!</p>
-<p>One exception is that it is OK to use <code>SharedData</code> to expose <a href="https://git.corp.adobe.com/pages/manticore/bot_army/Mix.Tasks.Bots.LoadTest.html">run-time
+<p>One exception is that it is OK to use <code>SharedData</code> to expose <a href="https://git.corp.adobe.com/pages/BotTestingFramework/bot_army/Mix.Tasks.Bots.LoadTest.html">run-time
 configuration</a> to your bots.</p>
 <h2 id="accessing-custom-config"><a class="heading-anchor" href="#accessing-custom-config"><i class="fas fa-link"></i></a>Accessing custom config</h2>
 <p>The test runners automatically preload <code>SharedData</code> with your run-time configuration.

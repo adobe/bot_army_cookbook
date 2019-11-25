@@ -32,7 +32,7 @@ happens, tied to the bot id, plus the duration and outcome. The logs look like t
 <code>custom</code> and the value must start with a space).</p>
 <p>These logs are written to <code>/bot_run.log</code>. You can send them to a log aggregator like
 splunk where you can do all kinds of analysis, or inspect them locally (see some tips
-to <a href="https://git.corp.adobe.com/pages/manticore/bot_army/readme.html#logging">make that easier</a>).</p>
+to <a href="https://git.corp.adobe.com/pages/BotTestingFramework/bot_army/readme.html#logging">make that easier</a>).</p>
 <h2 id="additional-logging"><a class="heading-anchor" href="#additional-logging"><i class="fas fa-link"></i></a>Additional logging</h2>
 <p>Of course you can also add custom logs in your actions. I recommend using
 <code>Logger.debug(...)</code>. This way, your custom logs are at a different level than all the
@@ -42,7 +42,7 @@ sensitive information. <code>Logger</code> is also better than <code>IO.inspect<
 because you have more control over its behavior. Using
 <code>inspect(unknown_value, pretty: true)</code> in your logs is useful, as is string
 interpolation (<code>&quot;User name: #{user_name}&quot;</code>).</p>
-<p>You can also use <a href="https://git.corp.adobe.com/pages/manticore/bot_army/BotArmy.Actions.html#log/2"><code>BotArmy.Actions.log</code></a> in your tree to log static
+<p>You can also use <a href="https://git.corp.adobe.com/pages/BotTestingFramework/bot_army/BotArmy.Actions.html#log/2"><code>BotArmy.Actions.log</code></a> in your tree to log static
 information.</p>
 <h2 id="which-logs-matter-"><a class="heading-anchor" href="#which-logs-matter-"><i class="fas fa-link"></i></a>Which logs matter?</h2>
 <p>Ultimately, the bot logs may be useful for debugging or for seeing timing including

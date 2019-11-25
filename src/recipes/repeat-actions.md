@@ -138,7 +138,7 @@ end
 ```
 
 [1]: https://hexdocs.pm/behavior_tree/BehaviorTree.Node.html#repeat_n/2
-[2]: https://git.corp.adobe.com/pages/manticore/bot_army/BotArmy.Actions.html#done/1
+[2]: https://git.corp.adobe.com/pages/BotTestingFramework/bot_army/BotArmy.Actions.html#done/1
 [3]: https://hexdocs.pm/behavior_tree/BehaviorTree.Node.html#repeat_until_fail/1
 [4]: https://hexdocs.pm/behavior_tree/BehaviorTree.Node.html#repeat_until_succeed/1
 [5]: ../conditionally-run-actions/
