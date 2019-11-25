@@ -20,9 +20,28 @@
       <h1>How do I...  Read and write to the file system?</h1>
     </header>
 
-    <pre><code>- File.*
-- download via stream to file
-</code></pre>
+    <p>Need to interact with the local file system? It&apos;s easy with Elixir, just use the
+<a href="https://hexdocs.pm/elixir/File.html">File.*</a> module.</p>
+<p>If you are trying to download a file, the best way to go is to stream it from a
+remote URL to your file system directly, which can be quicker and avoids filling up
+memory on your server. The simplest way to do so is with this Erlang snippet:</p>
+<pre><code class="hljs elixir"><span class="hljs-comment"># Note, this is Erlang, so it looks odd, but it runs fine, and it is built in</span>
+<span class="hljs-comment"># Just note, in Erlang, you need to use single quoted strings</span>
+<span class="hljs-comment"># Also you need these two lines</span>
+<span class="hljs-symbol">:inets</span>.start()
+<span class="hljs-symbol">:ssl</span>.start()
+<span class="hljs-comment"># This path is relative to the current working directory (see File.cwd/0)</span>
+save_path = <span class="hljs-string">&apos;/mypic.jpg&apos;</span>
+image_url = <span class="hljs-string">&apos;http://exmple.com/img/pic1.jpg&apos;</span>
+<span class="hljs-symbol">:httpc</span>.request(
+  <span class="hljs-symbol">:get</span>,
+  {image_url, []},
+  [],
+  <span class="hljs-symbol">body_format:</span> <span class="hljs-symbol">:binary</span>,
+  <span class="hljs-symbol">stream:</span> save_path
+)</code></pre>
+
+
 
         <footer>
         </footer>
