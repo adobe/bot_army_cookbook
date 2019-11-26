@@ -20,9 +20,124 @@
       <h1>How do I...  Use long-polling?</h1>
     </header>
 
-    <pre><code>- blocking aproach in loop
-- non blocking (like websockets)
-</code></pre>
+    <p>If your system uses long-polling, then your bots will have to long-poll too, to
+create an accurate test. You have two ways of doing this.</p>
+<h2 id="blocking"><a class="heading-anchor" href="#blocking"><i class="fas fa-link"></i></a>Blocking</h2>
+<p>The simplest way to long-poll is to repeatedly make HTTP requests (with an
+appropriately long timeout). You could do this in a recursive loop, or as a
+<a href="../repeat-actions/">repeating action</a>. For example:</p>
+<pre><code class="hljs elixir"><span class="hljs-comment"># infinite loop long-poll action</span>
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">long_poll</span></span>(context) <span class="hljs-keyword">do</span>
+  _response = HTTPoison.get!(<span class="hljs-variable">@long_poll_url</span>, <span class="hljs-variable">@headers</span>, <span class="hljs-symbol">timeout:</span> <span class="hljs-number">300</span>)
+  <span class="hljs-comment"># recur</span>
+  long_poll(context)
+<span class="hljs-keyword">end</span></code></pre>
+
+<p>While this effectively represents long-polling, it presents a problem - the bot can&apos;t
+do anything else. The bot is either waiting for a response, or starting a new
+request. The bot will never get a chance to perform any other actions.</p>
+<p>This probably isn&apos;t what you want, though it can be useful for performance metrics.
+For example, <a href="../use-different-trees-for-different-bots/">split up</a> your bots to have half busy long-polling, and the other half
+making writes. This won&apos;t be an accurate load on your system, but it can give you
+useful metrics.</p>
+<h2 id="non-blocking"><a class="heading-anchor" href="#non-blocking"><i class="fas fa-link"></i></a>Non-blocking</h2>
+<p>For a more accurate representation, where bots can both long-poll <em>and</em> do their
+normal routine at the same time, you need to set up a concurrent asynchronous
+long-polling mechanic.</p>
+<p>The way to do this in Elixir is to create another Erlang process, which is simple and
+light-weight. The idea is to kick off the recursive long-poll in a <a href="https://elixir-lang.org/getting-started/processes.html">separate
+process</a>. Each time it gets a response, it needs to update the bot, then poll again.
+Because the bot&apos;s process isn&apos;t tied up waiting for a response, it can do other
+things.</p>
+<p>The part that I glossed over is how the long-polling process &quot;updates&quot; the bot. Each
+bot is actually a <a href="https://hexdocs.pm/elixir/GenServer.html"><code>GenServer</code></a>, so the long-polling process can <a href="https://hexdocs.pm/elixir/GenServer.html#call/3"><code>call</code></a> it with
+update messages. The bot will process the message in between actions, giving you a
+chance to update the context.</p>
+<p>In order to handle the incoming message, you need to extend your bot with a custom
+<a href="https://git.corp.adobe.com/pages/BotTestingFramework/bot_army/BotArmy.Bot.html#module-extending-the-bot"><code>BotArmy.Bot</code></a>. Depending on how you set it up, you can also include logic to switch
+between different feeds, as well as conditionally stop a specific feed. Here&apos;s an
+example:</p>
+<pre><code class="hljs elixir"><span class="hljs-comment"># In MyActions.ex</span>
+
+<span class="hljs-variable">@doc</span> <span class="hljs-string">&quot;&quot;</span><span class="hljs-string">&quot;
+Action to kick off a long-polling process for the active feed.
+
+Only call this action once to initialize the process.  If the active feed changes,
+you should call this again with the new feed id.
+
+Make sure to handle the update messages in a custom `BotArmy.Bot`.
+&quot;</span><span class="hljs-string">&quot;&quot;</span>
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">start_long_polling</span></span>(%{<span class="hljs-symbol">active_feed_id:</span> feed_id}) <span class="hljs-keyword">when</span> is_binary(feed_id) <span class="hljs-keyword">do</span>
+  bot_pid = <span class="hljs-keyword">self</span>()
+  long_poll_url = <span class="hljs-variable">@url_base</span> &lt;&gt; <span class="hljs-string">&quot;/feeds/<span class="hljs-subst">#{feed_id}</span>&quot;</span>
+  headers = []
+
+  <span class="hljs-comment"># This starts a new process, and does not block the bot.  Since it is linked to the</span>
+  <span class="hljs-comment"># bot, if either process crashes, the other one will too.  In this case, if the</span>
+  <span class="hljs-comment"># long-poll request errors, the bot will die.</span>
+  spawn_link(<span class="hljs-keyword">fn</span> -&gt;
+    <span class="hljs-comment"># wrap the long-polling steps in a function so it can recur</span>
+    do_long_poll = <span class="hljs-keyword">fn</span> -&gt;
+      <span class="hljs-comment"># Make the long-poll, blocking until it returns</span>
+      %{<span class="hljs-symbol">body:</span> body, <span class="hljs-symbol">status_code:</span> <span class="hljs-number">200</span>} = HTTPoison.get!(long_poll_url, headers, <span class="hljs-symbol">timeout:</span> <span class="hljs-number">300</span>)
+
+      <span class="hljs-comment"># Send the response to the bot, blocking until the bot handles it and replies.</span>
+      <span class="hljs-comment"># The message is a tuple that we need to create a `handle_call` for in our custom</span>
+      <span class="hljs-comment"># bot.  In this case, the bot&apos;s reply is a boolean for if we should poll again.</span>
+      continue_polling? =
+        GenServer.call(bot_pid, {<span class="hljs-symbol">:long_poll_response</span>, feed_id, Jason.parse!(body)})
+
+      if continue_polling? <span class="hljs-keyword">do</span>
+        <span class="hljs-comment"># recur</span>
+        do_long_poll()
+      else
+        <span class="hljs-comment"># exiting with `:normal` will quit the polling process without quitting the bot</span>
+        exit(<span class="hljs-symbol">:normal</span>)
+      <span class="hljs-keyword">end</span>
+    <span class="hljs-keyword">end</span>
+
+    <span class="hljs-comment"># kick off the initial long-poll</span>
+    do_long_poll()
+  <span class="hljs-keyword">end</span>)
+<span class="hljs-keyword">end</span>
+
+<span class="hljs-comment"># In MyBot.ex</span>
+<span class="hljs-comment"># Be sure to specify `--bot MyBot` when running the tests, see</span>
+<span class="hljs-comment"># https://git.corp.adobe.com/pages/BotTestingFramework/bot_army/Mix.Tasks.Bots.IntegrationTest.html#content</span>
+
+<span class="hljs-class"><span class="hljs-keyword">defmodule</span> <span class="hljs-title">MyBot</span></span> <span class="hljs-keyword">do</span>
+  <span class="hljs-variable">@moduledoc</span> <span class="hljs-string">&quot;&quot;</span><span class="hljs-string">&quot;
+  Extended `BotArmy.Bot` to handle long-polling updates.
+
+  See https://git.corp.adobe.com/pages/BotTestingFramework/bot_army/BotArmy.Bot.html#module-extending-the-bot
+  &quot;</span><span class="hljs-string">&quot;&quot;</span>
+
+  <span class="hljs-comment"># You need this line to get all of the base `Bot` functionality</span>
+  <span class="hljs-keyword">use</span> BotArmy.Bot
+
+  <span class="hljs-variable">@doc</span> <span class="hljs-string">&quot;&quot;</span><span class="hljs-string">&quot;
+  This matches the message sent from a long-polling process.  It receives the
+  response from the poll and replies with a boolean whether the long-polling should
+  continue or not, based on if the active feed changed since the long-poll started.
+  &quot;</span><span class="hljs-string">&quot;&quot;</span>
+  <span class="hljs-variable">@impl</span> GenServer
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">handle_call</span></span>({<span class="hljs-symbol">:long_poll_response</span>, feed_id, response}, _from, context) <span class="hljs-keyword">do</span>
+    <span class="hljs-comment"># Note that `context` is the same state of the bot used in the actions.</span>
+
+    <span class="hljs-comment"># Make sure the response is for a feed that we still care about</span>
+    if feed_id == context.active_feed_id <span class="hljs-keyword">do</span>
+      <span class="hljs-comment"># update the context however you need to based on the long-poll response</span>
+      new_context = Map.put(context, <span class="hljs-symbol">:feed_data</span>, response)
+      {<span class="hljs-symbol">:reply</span>, <span class="hljs-keyword">true</span>, new_context}
+    else
+      <span class="hljs-comment"># The active feed changed, so we ignore the obsolete response and reply not to</span>
+      <span class="hljs-comment"># continue polling.</span>
+      {<span class="hljs-symbol">:reply</span>, <span class="hljs-keyword">false</span>, context}
+    <span class="hljs-keyword">end</span>
+  <span class="hljs-keyword">end</span>
+<span class="hljs-keyword">end</span></code></pre>
+
+
 
         <footer>
         </footer>
