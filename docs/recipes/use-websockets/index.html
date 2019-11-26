@@ -20,10 +20,145 @@
       <h1>How do I...  Use websockets?</h1>
     </header>
 
-    <pre><code>- 2nd channel concept
-- custom Bot
-- beware of blocking actions
-</code></pre>
+    <p>One great thing about the bots is that you can extend them to act as a full client to
+your server. If your clients sync over websockets, then your bots need to sync over
+websockets too. While this does involve some more advanced programming and
+maintenance, it is very doable. An added benefit to treating your bots as a first
+client is that they can act as a <a href="https://martinfowler.com/bliki/CanaryRelease.html">canary release</a> test without exposing real users to
+possible bugs.</p>
+<h2 id="adding-a-second-channel-to-the-bots"><a class="heading-anchor" href="#adding-a-second-channel-to-the-bots"><i class="fas fa-link"></i></a>Adding a second &quot;channel&quot; to the bots</h2>
+<p>The tricky thing about websockets (like <a href="../use-long-polling/">long-polling</a>) is that they are asynchronous
+(meaning that messages can arrive at any point in your flow of execution) and
+long-running (meaning messages continue to arrive throughout the lifetime of the
+bot). This is problematic because if the bots are actively waiting for websocket
+messages to come in, they can&apos;t do anything else in the mean time. How can you get
+the bots to do two things at once?</p>
+<p>The answer to concurrency issues like this in Erlang is almost always to add another
+<a href="https://elixir-lang.org/getting-started/processes.html">process</a>. The idea is that each bot can have a &quot;companion&quot; process that takes care
+of listening for websocket messages, and when one does arrive, it sends a message to
+the bot, which the bot can handle in between performing actions.</p>
+<p>A way to think about it is to consider the sequence of actions that the bot
+continually runs through as one channel of control flow, and the stream of messages
+that arrive from websockets as a secondary channel that gets merged in.</p>
+<h2 id="extending-the-bot"><a class="heading-anchor" href="#extending-the-bot"><i class="fas fa-link"></i></a>Extending the bot</h2>
+<p>In order to handle this second channel, and to set up a websocket client in the first
+place, you will need to customize the bot. <a href="https://git.corp.adobe.com/pages/BotTestingFramework/bot_army/BotArmy.Bot.html#module-extending-the-bot"><code>BotArmy.Bot</code></a> gives you a way to do
+this.</p>
+<p>First, you have to set up a websocket client like <a href="https://hexdocs.pm/websockex/readme.html">websockex</a>. This library handles
+the low-level work of managing a websocket connection. It does this all in a new
+process, connected to the bot. You can instruct it how to handle incoming messages
+and use it to send outgoing ones. In this case, incoming messges will be forwarded to
+the bot. Each bot will have its own connected websockex process that it communicates
+with.</p>
+<p>Second you need to instruct the bot how to handle the forwarded incoming websocket
+messages. Each bot is a <a href="https://hexdocs.pm/elixir/GenServer.html"><code>GenServer</code></a>, so you use the normal <a href="https://hexdocs.pm/elixir/GenServer.html#c:handle_call/3"><code>handle_call</code></a>
+functionality.</p>
+<p>Here is a full, annotated example:</p>
+<pre><code class="hljs elixir"><span class="hljs-comment"># In MyActions.ex</span>
+
+<span class="hljs-comment"># Make sure to call this once when your bot starts</span>
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">set_up_websocket</span></span>(_context) <span class="hljs-keyword">do</span>
+  {<span class="hljs-symbol">:ok</span>, websockex_pid} = MyWebSocket.start_link(<span class="hljs-keyword">self</span>())
+  {<span class="hljs-symbol">:succeed</span>, <span class="hljs-symbol">websockex_pid:</span> websockex_pid}
+<span class="hljs-keyword">end</span>
+
+<span class="hljs-comment"># Here is how you send a websocket message in your actions</span>
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">send_websocket_message</span></span>(%{<span class="hljs-symbol">websockex_pid:</span> websockex_pid}) <span class="hljs-keyword">do</span>
+  msg = <span class="hljs-string">&quot;hello world&quot;</span>
+
+  <span class="hljs-keyword">case</span> WebSockex.send_frame(websockex_pid, msg) <span class="hljs-keyword">do</span>
+    <span class="hljs-symbol">:ok</span> -&gt;
+      <span class="hljs-symbol">:succeed</span>
+
+    {<span class="hljs-symbol">:error</span>, reason} -&gt;
+      Logger.error(inspect(reason))
+      <span class="hljs-symbol">:fail</span>
+  <span class="hljs-keyword">end</span>
+<span class="hljs-keyword">end</span>
+
+<span class="hljs-comment"># In MyWebSocket.ex</span>
+
+<span class="hljs-class"><span class="hljs-keyword">defmodule</span> <span class="hljs-title">MyWebSocket</span></span> <span class="hljs-keyword">do</span>
+  <span class="hljs-variable">@moduledoc</span> <span class="hljs-string">&quot;&quot;</span><span class="hljs-string">&quot;
+  A separate process that manages websocket messaging.
+
+  Each bot has its own WebSocket process.
+  &quot;</span><span class="hljs-string">&quot;&quot;</span>
+  <span class="hljs-keyword">use</span> WebSockex
+
+  <span class="hljs-variable">@url</span> <span class="hljs-string">&quot;ws://example.com&quot;</span>
+
+  <span class="hljs-variable">@doc</span> <span class="hljs-string">&quot;&quot;</span><span class="hljs-string">&quot;
+  Start a new websocket process.
+
+  Pass it the `pid` of the bot so it can forward messages to it.
+  Note that these processes are linked, so if one crashes, the other will die too.
+  &quot;</span><span class="hljs-string">&quot;&quot;</span>
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">start_link</span></span>(bot_pid) <span class="hljs-keyword">when</span> is_pid(bot_pid) <span class="hljs-keyword">do</span>
+    <span class="hljs-comment"># The bot_pid is the only thing stored in this process&apos;s state, but you could</span>
+    <span class="hljs-comment"># store more if you want to.  It will be available in each handle_frame function.</span>
+    WebSockex.start_link(<span class="hljs-variable">@url</span>, __MODULE_<span class="hljs-number">_</span>, bot_pid)
+  <span class="hljs-keyword">end</span>
+
+  <span class="hljs-comment"># Frames will be one of these https://hexdocs.pm/websockex/WebSockex.html#t:frame/0</span>
+  <span class="hljs-comment"># In this case we ignore the various heartbeat messages</span>
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">handle_frame</span></span>({<span class="hljs-symbol">:text</span>, msg}, bot_pid) <span class="hljs-keyword">do</span>
+    <span class="hljs-comment"># This will block until the bot handles this message and replies `:ok`.  Any</span>
+    <span class="hljs-comment"># other reply will crash both processes.</span>
+    <span class="hljs-symbol">:ok</span> = MyBot.handle_websocket_message(bot_pid, msg)
+
+    <span class="hljs-comment"># You can respond as in https://hexdocs.pm/websockex/WebSockex.html#c:handle_frame/2</span>
+    <span class="hljs-comment"># In this case we just return successfully.</span>
+    {<span class="hljs-symbol">:ok</span>, bot_pid}
+  <span class="hljs-keyword">end</span>
+<span class="hljs-keyword">end</span>
+
+<span class="hljs-comment"># In MyBot.ex</span>
+<span class="hljs-comment"># Be sure to specify `--bot MyBot` when running the tests, see</span>
+<span class="hljs-comment"># https://git.corp.adobe.com/pages/BotTestingFramework/bot_army/Mix.Tasks.Bots.LoadTest.html#content</span>
+
+<span class="hljs-class"><span class="hljs-keyword">defmodule</span> <span class="hljs-title">MyBot</span></span> <span class="hljs-keyword">do</span>
+  <span class="hljs-variable">@moduledoc</span> <span class="hljs-string">&quot;&quot;</span><span class="hljs-string">&quot;
+  Extended `BotArmy.Bot` to handle websockets.
+
+  See https://git.corp.adobe.com/pages/BotTestingFramework/bot_army/BotArmy.Bot.html#module-extending-the-bot
+  &quot;</span><span class="hljs-string">&quot;&quot;</span>
+
+  <span class="hljs-comment"># You need this line to get all of the base `Bot` functionality</span>
+  <span class="hljs-keyword">use</span> BotArmy.Bot
+
+  <span class="hljs-variable">@doc</span> <span class="hljs-string">&quot;&quot;</span><span class="hljs-string">&quot;
+  A handy helper to call when websocket messages arrive.
+  &quot;</span><span class="hljs-string">&quot;&quot;</span>
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">handle_websocket_message</span></span>(bot_pid, msg),
+    <span class="hljs-symbol">do:</span> GenServer.call(bot_pid, {<span class="hljs-symbol">:websocket_message</span>, msg})
+
+  <span class="hljs-variable">@doc</span> <span class="hljs-string">&quot;&quot;</span><span class="hljs-string">&quot;
+  This handler matches the formated :websocket_message tuple from `handle_websocket_message`.
+  &quot;</span><span class="hljs-string">&quot;&quot;</span>
+  <span class="hljs-variable">@impl</span> GenServer
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">handle_call</span></span>({<span class="hljs-symbol">:websocket_message</span>, msg}, _from, context) <span class="hljs-keyword">do</span>
+    <span class="hljs-comment"># Note that `context` is the same state of the bot used in the actions.</span>
+
+    <span class="hljs-comment"># update the context however you need</span>
+    new_context = do_syncing(context, msg)
+
+    <span class="hljs-comment"># we use `call` (instead of `cast`) and return `:ok` just to acknowledge the</span>
+    <span class="hljs-comment"># message was received.</span>
+    <span class="hljs-symbol">:ok</span>
+  <span class="hljs-keyword">end</span>
+<span class="hljs-keyword">end</span></code></pre>
+
+<p>Whenever dealing with concurrency, be sure to consider race conditions. For example,
+if the bot leaves a websocket &quot;topic&quot; in an action, but a message for that topic
+already landed during the same time period, then you would want to ignore that
+message. You can check for this problem by tracking topics you care about in the
+<code>context</code>, then comparing them against the received message. (Topics are a convention
+to classify messages, like <code>&quot;my_topic:my_message&quot;</code>).</p>
+<p>One final point to keep in mind is that since the bot only checks for new messages in
+between actions, if an action ever <a href="../wait-for-async-results/">blocks</a> or takes a long time to run, you will be
+delayed in handling any received websocket messages.</p>
+
 
         <footer>
         </footer>
