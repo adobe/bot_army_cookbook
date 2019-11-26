@@ -111,6 +111,9 @@ functionality.</p>
     <span class="hljs-comment"># In this case we just return successfully.</span>
     {<span class="hljs-symbol">:ok</span>, bot_pid}
   <span class="hljs-keyword">end</span>
+
+  <span class="hljs-comment"># Heartbeat messages fall through here</span>
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">handle_frame</span></span>(_other, bot_pid), <span class="hljs-symbol">do:</span> {<span class="hljs-symbol">:ok</span>, bot_pid}
 <span class="hljs-keyword">end</span>
 
 <span class="hljs-comment"># In MyBot.ex</span>
@@ -145,7 +148,7 @@ functionality.</p>
 
     <span class="hljs-comment"># we use `call` (instead of `cast`) and return `:ok` just to acknowledge the</span>
     <span class="hljs-comment"># message was received.</span>
-    <span class="hljs-symbol">:ok</span>
+    {<span class="hljs-symbol">:reply</span>, <span class="hljs-symbol">:ok</span>, new_context}
   <span class="hljs-keyword">end</span>
 <span class="hljs-keyword">end</span></code></pre>
 

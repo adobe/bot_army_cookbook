@@ -105,6 +105,9 @@ defmodule MyWebSocket do
     # In this case we just return successfully.
     {:ok, bot_pid}
   end
+
+  # Heartbeat messages fall through here
+  def handle_frame(_other, bot_pid), do: {:ok, bot_pid}
 end
 
 # In MyBot.ex
@@ -139,7 +142,7 @@ defmodule MyBot do
 
     # we use `call` (instead of `cast`) and return `:ok` just to acknowledge the
     # message was received.
-    :ok
+    {:reply, :ok, new_context}
   end
 end
 ```
