@@ -20,10 +20,37 @@
       <h1>How do I...  Wait for another bot to finish an action?</h1>
     </header>
 
-    <pre><code>- wait
-- SharedData flags + retry
-- 2nd channel (websocket, etc) + retry
-</code></pre>
+    <p>When writing tests, you might try to have one bot wait for another bot to complete an
+action. This can be useful for &quot;multiple session&quot; testing. Coordinating these two
+concurrent processes can be challenging, but you have a few options.</p>
+<h2 id="switch-users-not-bots"><a class="heading-anchor" href="#switch-users-not-bots"><i class="fas fa-link"></i></a>Switch users, not bots</h2>
+<p>Depending on what you are trying to test, the simplest approach is to have a single
+bot that authenticates as the first user, takes some actions, then authenticates as
+the second user and continues. This is very clear to understand and orchestrate, but
+it does mean that the two sessions are happening serially instead of concurrently.
+Nonetheless, it can be useful, not only for tests, but also to run some simple set
+up.</p>
+<p>A very similar approach is to run the setup in the &quot;pre&quot; tree of an integration test.
+Just keep in mind that the pre tree is a separate bot, so the context will be lost
+when the pre tree completes.</p>
+<h2 id="use-a-wait"><a class="heading-anchor" href="#use-a-wait"><i class="fas fa-link"></i></a>Use a wait</h2>
+<p>If you want to have separate bots, you have to coordinate between them somehow. The
+most naive way of doing so is to just have the second bot go idle for however many
+seconds you think the first bot needs to finish its action.</p>
+<p>This is not a great solution though. At best, you are introducing extra unnecessary
+time into your tests if you guess too long of a pause. At worst, the first bot might
+take longer than expected for some reason, and your pause will be too short, leading
+to flaky tests.</p>
+<h2 id="set-a-flag-in-shareddata"><a class="heading-anchor" href="#set-a-flag-in-shareddata"><i class="fas fa-link"></i></a>Set a flag in SharedData</h2>
+<p>A more reliable approach is to have the second bot go into a <a href="../repeat-actions/#limiting-retries">retry loop</a>, checking
+for a flag set in <code>SharedData</code>. When the first bot finishes its action, it just
+needs to set that flag.</p>
+<h2 id="rely-on-the-system-under-test"><a class="heading-anchor" href="#rely-on-the-system-under-test"><i class="fas fa-link"></i></a>Rely on the system under test</h2>
+<p>Perhaps the best approach, when possible, is to check the state of the system under
+test to tell if the first bot has finished its work. You would use a similar retry
+loop with a query against the system, or if you have a second channel for <a href="../use-websockets/#adding-a-second-channel-to-the-bots">syncing</a>,
+you would check against the context for the required condition.</p>
+
 
         <footer>
         </footer>
