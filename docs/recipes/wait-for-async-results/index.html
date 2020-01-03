@@ -20,10 +20,51 @@
       <h1>How do I...  Wait for async results?</h1>
     </header>
 
-    <pre><code>- blocking vs non blocking implications at bot level
-- blocking vs async at lib/Elixir level
-- receive w/ timeout
-</code></pre>
+    <p>Sometimes you need to wait for results. With Elixir and the bots, you have a few
+ways of doing so, but different approaches have important consequences that you need
+to be aware of.</p>
+<h2 id="concurrency-at-the-elixir-level"><a class="heading-anchor" href="#concurrency-at-the-elixir-level"><i class="fas fa-link"></i></a>Concurrency at the Elixir level</h2>
+<p>Erlang, and hence Elixir was built for concurrency. Whenever you do an asynchronous
+operation in Elixir, you have two options: stop what you are doing until the
+operation completes, or run the operation in a separate Erlang process and continue
+with what you were doing before. In the latter case, you have the opportunity to
+check the result of the separate process at a later time if necessary.</p>
+<p>The important thing to consider is which processes are OK or not OK to block while
+waiting, and how you will get the results at a later time. Elixir/Erlang has a few
+primitives to help with this, from a simple <code>recieve</code> that will block until the
+desired response arrives, to <code>Task.await</code> that encapsulates the workflow a little
+nicer, to <code>GenServer</code>s which set up a framework for a flexible &quot;receive loop.&quot;</p>
+<p>You learn more about <a href="https://elixirschool.com/en/lessons/advanced/concurrency/">Elixir concurrency</a> and <a href="https://elixirschool.com/en/lessons/advanced/otp-concurrency/">GenServers</a> to fully understand these
+concepts.</p>
+<h2 id="blocking-vs-non-blocking-at-bot-level"><a class="heading-anchor" href="#blocking-vs-non-blocking-at-bot-level"><i class="fas fa-link"></i></a>Blocking vs.non-blocking at bot level</h2>
+<p>In the Bot Army, each individual bot is a separate process. More specifically, each
+bot is a GenServer. Each action that it carries out is a potentially long-running
+operation that must complete before it can move on to the next action. Furthermore,
+the bot is only able to respond to anything else in between each action.</p>
+<p>This isn&apos;t normally a problem, but if you are using a separate channel like
+syncing over <a href="../use-websockets/">websockets</a> or <a href="../use-long-polling/">long-polling</a>, those updates will be blocked during the
+time it takes an action to complete. Likewise, if handling a message from websockets
+or long-polling takes a long time, the bot won&apos;t be able to move on to the next
+action until it completes.</p>
+<p>In some cases, this just serves to slow the bot down, which may not matter. But in
+the worst case, you might get into a deadlock, like if your action blocks to wait for
+the result of a websocket sync, which will never get processed, because the bot is
+stuck in the action. So how do you handle asynchronous issues like this?</p>
+<p>The basic idea is finish up the action as soon a possible, even if long-running
+results have not returned, so that the bot can keep ticking, and have a plan to &quot;come
+back&quot; to the unfinished results the next time around.</p>
+<p>See <a href="../repeat-actions/#limiting-retries">validating results</a> for an example of using <code>:continue</code> to break up a
+potentially long waiting period into multiple shorter periods.</p>
+<p>The <a href="../use-long-polling/">long-polling</a> recipe shows how to spawn a new process to do the slow
+asynchronous work and send a message back to the bot to process later.</p>
+<p>The <a href="../use-websockets/">websockets</a> recipe shows a similar approach with more discussion.</p>
+<p>In each of these examples, long-running operations get broken up or shunted off to
+other processes to update the bot&apos;s state at a later time, and the behavior tree is
+set up in a way for the bot to respond to new data in its state whenever it becomes
+available, without having to block while the work happens.</p>
+<p>If you are mindful of the issues and the approaches explored here, you should be able
+to handle any async operation in your bots.</p>
+
 
         <footer>
         </footer>
