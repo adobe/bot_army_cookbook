@@ -44,20 +44,23 @@ parallel <span class="hljs-string">&quot;changing post name&quot;</span> <span c
 <span class="hljs-keyword">end</span>
 
 <span class="hljs-comment"># your action (this is generic enough to validate any expected values)</span>
-<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">validate_current_post</span></span>(context, expected_values) <span class="hljs-keyword">when</span> is_map(expected_values) <span class="hljs-keyword">do</span>
-  <span class="hljs-keyword">case</span> Map.get(context, <span class="hljs-symbol">:current_post</span>) <span class="hljs-keyword">do</span>
-    ^expected_values -&gt; <span class="hljs-symbol">:succeed</span>
-    <span class="hljs-number">_</span> -&gt; <span class="hljs-symbol">:fail</span>
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">validate</span></span>(%{<span class="hljs-symbol">current_post:</span> actual_values}, expected_values) <span class="hljs-keyword">do</span>
+  if Enum.all?(expected_values, &amp;(&amp;<span class="hljs-number">1</span> <span class="hljs-keyword">in</span> actual_values)) <span class="hljs-keyword">do</span>
+    <span class="hljs-symbol">:succeed</span>
+  else
+    Logger.error(
+      <span class="hljs-string">&quot;Validation failed.\nExpecting values: <span class="hljs-subst">#{inspect(expected_values, <span class="hljs-symbol">pretty:</span> <span class="hljs-keyword">true</span>)}</span>\nAcutal values: <span class="hljs-subst">#{
+        inspect(actual_values, <span class="hljs-symbol">pretty:</span> <span class="hljs-keyword">true</span>)
+      }</span>&quot;</span>
+    )
+    <span class="hljs-symbol">:fail</span>
   <span class="hljs-keyword">end</span>
 <span class="hljs-keyword">end</span></code></pre>
 
-<p>Note the <a href="https://elixir-lang.org/getting-started/pattern-matching.html#the-pin-operator">pin operator</a> (<code>^</code>) in the pattern matching, which matches against the
-value of <code>expected_values</code> instead of rebinding the matched value to that variable
-(that&apos;s not entirely true, as Elixir values are immutable, but functionally that&apos;s
-how it works).</p>
-<p>Also note that pattern matching maps will only check the supplied fields, so this
-will pass even if the current post has more fields than what you specify in
-<code>expected_values</code>.</p>
+<p>This just makes sure all of the expected values are in the actual values. The
+<code>&amp;(&amp;1 ...)</code> syntax is short for <code>fn arg1 -&gt; arg1 ... end)</code>. Note that this will only
+check the supplied fields, so this will pass even if the current post has more fields
+than what you specify in <code>expected_values</code>.</p>
 <p>An alternative to hard coding values is to store expected values in the context.
 This may be useful for example to store the number of posts after fetching them,
 and using that later to check if the number changes after updating, adding or

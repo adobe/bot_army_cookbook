@@ -31,22 +31,24 @@ parallel "changing post name" do
 end
 
 # your action (this is generic enough to validate any expected values)
-def validate_current_post(context, expected_values) when is_map(expected_values) do
-  case Map.get(context, :current_post) do
-    ^expected_values -> :succeed
-    _ -> :fail
+def validate(%{current_post: actual_values}, expected_values) do
+  if Enum.all?(expected_values, &(&1 in actual_values)) do
+    :succeed
+  else
+    Logger.error(
+      "Validation failed.\nExpecting values: #{inspect(expected_values, pretty: true)}\nAcutal values: #{
+        inspect(actual_values, pretty: true)
+      }"
+    )
+    :fail
   end
 end
 ```
 
-Note the [pin operator][pin] (`^`) in the pattern matching, which matches against the
-value of `expected_values` instead of rebinding the matched value to that variable
-(that's not entirely true, as Elixir values are immutable, but functionally that's
-how it works).
-
-Also note that pattern matching maps will only check the supplied fields, so this
-will pass even if the current post has more fields than what you specify in
-`expected_values`.
+This just makes sure all of the expected values are in the actual values. The
+`&(&1 ...)` syntax is short for `fn arg1 -> arg1 ... end)`. Note that this will only
+check the supplied fields, so this will pass even if the current post has more fields
+than what you specify in `expected_values`.
 
 An alternative to hard coding values is to store expected values in the context.
 This may be useful for example to store the number of posts after fetching them,
