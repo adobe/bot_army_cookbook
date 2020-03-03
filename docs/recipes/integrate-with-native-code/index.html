@@ -1,0 +1,140 @@
+  <!DOCTYPE html>
+  <html lang="en">
+    <head>
+      <meta charset="UTF-8" />
+      <title>Bot Army Cookbook - Integrate with native code</title>
+      <meta name="description" content="Tips, Tricks, and Recipes for Building Effective Bots" />
+      <script src="http://localhost:35729/livereload.js"></script>
+      <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.7.0/styles/atom-one-dark.min.css" />
+      <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/5.11.2/css/all.min.css" />
+      <link rel="stylesheet" href="../../styles.css">
+      <script src="https://unpkg.com/lunr/lunr.js"></script>
+      <link rel="stylesheet" href="https://use.typekit.net/cdl6wid.css">
+      <meta name="viewport" content="width=device-width, initial-scale=1">
+    </head>
+  
+    <body class="text-gray-600">
+      <div id="content" class="container mx-auto py-8 px-8 lg:px-32 xl:px-64">
+        <header class="mb-3">
+      <a class="inline-block mb-2 no-underline text-gray-500 hover:text-steelblue" href="../../">&larr; Bot Army Cookbook</a>
+      <h1>How do I...  Integrate with native code?</h1>
+    </header>
+
+    <p>At some point you may need to use the bots to drive native code, like C++ for
+example. This is not for the faint of heart, but it is possible.</p>
+<p>Erlang has a few ways of communicating with native code. The most suitable option for
+the bots is using &quot;ports.&quot; You can see a thorough example of using <a href="http://erlang.org/doc/tutorial/c_port.html">Erlang ports</a>. A
+simplified example pertaining to the bots is below.</p>
+<h2 id="ports"><a class="heading-anchor" href="#ports"><i class="fas fa-link"></i></a>Ports</h2>
+<p>The idea of a port is to spawn a native process from Elixir/Erlang in a way that can
+monitor if the process goes down. You can also send binary data to and from the
+process via stdio. This uses the <a href="https://hexdocs.pm/elixir/Port.html">Elixir Ports</a> standard library.</p>
+<p>Here is a sample action for the bots that starts up a port:</p>
+<pre><code class="hljs elixir"><span class="hljs-variable">@doc</span> <span class="hljs-string">&quot;&quot;</span><span class="hljs-string">&quot;
+Launches the provided executable
+
+In this case, the executable is in the standard `priv` directory.
+This specifies 2 bytes to prepend to each message to indicate its length.
+&quot;</span><span class="hljs-string">&quot;&quot;</span>
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">open_port</span></span>(_context, executable_path) <span class="hljs-keyword">do</span>
+  path = Path.join(<span class="hljs-symbol">:code</span>.priv_dir(<span class="hljs-symbol">:your_apps_name</span>), executable_path)
+  Port.open({<span class="hljs-symbol">:spawn</span>, path}, [{<span class="hljs-symbol">:packet</span>, <span class="hljs-number">2</span>}])
+  {<span class="hljs-symbol">:succeed</span>, <span class="hljs-symbol">port:</span> port}
+<span class="hljs-keyword">end</span></code></pre>
+
+<p>Once the port has been opened and the <code>port</code> is in the context, you can send messages
+to it. Here is a helper that enumerates the contract API exposed by the external
+library, and does the encoding and sending of the message for you. This example uses
+<a href="https://github.com/lexmag/msgpax">Msgpack</a> to encode the data, but you could encode it in any binary format or a JSON
+string. Notice how the integer representation of the action is prepended to the
+message.</p>
+<pre><code class="hljs elixir"><span class="hljs-comment"># &quot;Enum&quot; of the available actions the external code understands (identified as</span>
+<span class="hljs-comment"># integers starting with 0).</span>
+<span class="hljs-comment"># **You need to implement the same enum in the external code!**</span>
+<span class="hljs-variable">@actions</span> [
+           <span class="hljs-symbol">:create</span>,
+           <span class="hljs-symbol">:get_post</span>,
+           <span class="hljs-symbol">:update_post</span>
+         ]
+         |&gt; Enum.with_index(<span class="hljs-number">0</span>)
+         |&gt; Map.new()
+
+<span class="hljs-variable">@doc</span> <span class="hljs-string">&quot;&quot;</span><span class="hljs-string">&quot;
+Sends a command through the port to the indicated action with the included args.
+
+See @actions for valid action atoms.
+
+Opts can include a `timeout` (defaults to 5000ms).
+&quot;</span><span class="hljs-string">&quot;&quot;</span>
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">call_port</span></span>(port, action, args, opts \\ []) <span class="hljs-keyword">when</span> is_port(port) <span class="hljs-keyword">and</span> is_atom(action) <span class="hljs-keyword">do</span>
+  timeout = Keyword.get(opts, <span class="hljs-symbol">:timeout</span>, <span class="hljs-number">5000</span>)
+
+  {<span class="hljs-symbol">:ok</span>, data} = Msgpax.pack(args)
+
+  action_index =
+    Map.get(<span class="hljs-variable">@actions</span>, action) ||
+      raise <span class="hljs-string">&quot;Invalid action: <span class="hljs-subst">#{inspect(action)}</span>&quot;</span>
+
+  Port.command(port, [&lt;&lt;action_index&gt;&gt; | data])
+
+  receive <span class="hljs-keyword">do</span>
+    {^port, {<span class="hljs-symbol">:data</span>, msg}} -&gt;
+      Msgpax.unpack(msg)
+  after
+    timeout -&gt;
+      {<span class="hljs-symbol">:error</span>, <span class="hljs-symbol">:timeout</span>}
+  <span class="hljs-keyword">end</span>
+<span class="hljs-keyword">end</span></code></pre>
+
+<p>With this in place, you can make actions for each API you want to call. The actions
+need to interpret the response:</p>
+<pre><code class="hljs elixir"><span class="hljs-variable">@doc</span> <span class="hljs-string">&quot;&quot;</span><span class="hljs-string">&quot;
+Calls the &quot;</span>create<span class="hljs-string">&quot; api with some values.
+Note that the actual created state lives in the external library!
+&quot;</span><span class="hljs-string">&quot;&quot;</span>
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">create</span></span>(%{<span class="hljs-symbol">port:</span> port}, %{<span class="hljs-symbol">name:</span> <span class="hljs-number">_</span>, <span class="hljs-symbol">age:</span> <span class="hljs-number">_</span>} = args) <span class="hljs-keyword">do</span>
+  <span class="hljs-keyword">case</span> call_port(port, <span class="hljs-symbol">:create</span>, args) <span class="hljs-keyword">do</span>
+    <span class="hljs-comment"># NULL gets sent back, which gets converted to 0</span>
+    {<span class="hljs-symbol">:ok</span>, <span class="hljs-number">0</span>} -&gt;
+      <span class="hljs-symbol">:succeed</span>
+
+    other -&gt;
+      Logger.error(<span class="hljs-string">&quot;Unexpected response, <span class="hljs-subst">#{inspect(other)}</span>&quot;</span>)
+      <span class="hljs-symbol">:fail</span>
+  <span class="hljs-keyword">end</span>
+<span class="hljs-keyword">end</span></code></pre>
+
+<p>When you are done, you can close the port with the following action. If the bots
+crash, the external executable will only close if you <a href="https://hexdocs.pm/elixir/Port.html#module-zombie-operating-system-processes">respond to the closed stdio
+channel</a> correctly.</p>
+<pre><code class="hljs elixir"><span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">close_port</span></span>(%{<span class="hljs-symbol">port:</span> port}) <span class="hljs-keyword">do</span>
+  Port.close(port)
+
+  receive <span class="hljs-keyword">do</span>
+    {<span class="hljs-symbol">:EXIT</span>, ^port, <span class="hljs-symbol">:normal</span>} -&gt;
+      <span class="hljs-symbol">:succeed</span>
+
+    other -&gt;
+      Logger.error(<span class="hljs-string">&quot;Failed to close port, <span class="hljs-subst">#{inspect(other)}</span>&quot;</span>)
+      {<span class="hljs-symbol">:error</span>, other}
+  after
+    <span class="hljs-number">1000</span> -&gt;
+      Logger.error(<span class="hljs-string">&quot;Timed out trying to close port&quot;</span>)
+      {<span class="hljs-symbol">:error</span>, <span class="hljs-symbol">:timeout</span>}
+  <span class="hljs-keyword">end</span>
+<span class="hljs-keyword">end</span></code></pre>
+
+<h2 id="the-executable-side"><a class="heading-anchor" href="#the-executable-side"><i class="fas fa-link"></i></a>The executable side</h2>
+<p>You will need to add a layer to the executable to receive and handle messages over
+stdio properly. The details of this depend on the language of your executable. See
+the <a href="http://erlang.org/doc/tutorial/c_port.html">Erlang ports</a> link for examples in C.</p>
+<p>The summary is to receive messages using the first 2 bytes to determine the length,
+then to check the next byte to look up the action it corresponds to, then to decode
+the rest of the message to get any arguments, then to call the correct action
+appropriately, encode the response, and send it back over stdio.</p>
+
+
+        <footer>
+        </footer>
+      </body>
+    </html>
