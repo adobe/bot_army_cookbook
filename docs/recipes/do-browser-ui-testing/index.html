@@ -25,7 +25,7 @@ it&apos;s not much different from using an HTTP library. In fact, you could crea
 HTTP adapter, and a Hound adapter with the same API for your actions to call, and
 switch them out at runtime as needed. In other words, you can use the same bot trees
 and actions to run both API level tests and browser UI tests!</p>
-<p>Getting set up is super easy - I&apos;ve created a <a href="https://git.corp.adobe.com/schomay/bot_army_ui_testing_demo">UI testing demo</a> repository with
+<p>Getting set up is super easy - I&apos;ve created a <a href="https://github.com/adobe/bot_army_ui_testing_demo">UI testing demo</a> repository with
 full instructions and examples that you can just clone and modify as needed. Be sure
 to read the Hound docs.</p>
 <p>UI testing is notoriously flakey. You can mitigate problems if you are disciplined.
@@ -45,7 +45,7 @@ a complex page, creating a <a href="https://github.com/samueljseay/page_object">
 when you try to test for them. Hound has a built-in retry system for most actions
 that involve inspecting the DOM. But some actions, like checking the page&apos;s title
 do not have built-in retries, and you might sometimes need them. See the
-<a href="https://git.corp.adobe.com/schomay/bot_army_ui_testing_demo/blob/master/lib/actions/cookbook.ex#L117">retry_with_timeout</a> example in the demo repo&apos;s actions for a simple generic
+<a href="https://github.com/adobe/bot_army_ui_testing_demo/blob/master/lib/actions/cookbook.ex#L105">retry_with_timeout</a> example in the demo repo&apos;s actions for a simple generic
 retry implementation.</li>
 </ul>
 <p>Happy automating!</p>

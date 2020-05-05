@@ -37,6 +37,6 @@ Here are a few tips:
 Happy automating!
 
 [hound]: https://hexdocs.pm/hound/readme.html
-[demo]: https://git.corp.adobe.com/schomay/bot_army_ui_testing_demo
+[demo]: https://github.com/adobe/bot_army_ui_testing_demo
 [page object]: https://github.com/samueljseay/page_object
-[retry_with_timeout]: https://git.corp.adobe.com/schomay/bot_army_ui_testing_demo/blob/master/lib/actions/cookbook.ex#L117
+[retry_with_timeout]: https://github.com/adobe/bot_army_ui_testing_demo/blob/master/lib/actions/cookbook.ex#L105

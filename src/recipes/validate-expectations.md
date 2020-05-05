@@ -69,5 +69,5 @@ See [how to repeat actions] and [`retry_with_timeout`] for two expressive ways t
 retries.
 
 [how to repeat actions]: ../repeat-actions/#limiting-retries
-[`retry_with_timeout`]: https://git.corp.adobe.com/schomay/bot_army_ui_testing_demo/blob/master/lib/actions/cookbook.ex#L117
+[`retry_with_timeout`]: https://github.com/adobe/bot_army_ui_testing_demo/blob/master/lib/actions/cookbook.ex#L105
 [pin]: https://elixir-lang.org/getting-started/pattern-matching.html#the-pin-operator
