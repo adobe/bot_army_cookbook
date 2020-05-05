@@ -24,5 +24,5 @@ because the random functionality uses a uniform distribution, the wait times _sh
 be more or less evenly spaced across the ramp-up duration. You can use this trick in
 other similar situations, such as [using different trees for different bots][random trees].
 
-[wait]: https://git.corp.adobe.com/pages/BotTestingFramework/bot_army/BotArmy.Actions.html#wait/3
+[wait]: https://hexdocs.pm/bot_army/1.0.0/BotArmy.Actions.html#wait/3
 [random trees]: ../use-different-trees-for-different-bots

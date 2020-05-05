@@ -87,5 +87,5 @@ Note that in the load test runner, when a bot dies, a new one gets started up in
 place. In the integration test runner, the test will fail if a bot dies (the test
 will also fail if the entire tree `:fail`s).
 
-[error action]: https://git.corp.adobe.com/pages/BotTestingFramework/bot_army/BotArmy.Actions.html#error/2
+[error action]: https://hexdocs.pm/bot_army/1.0.0/BotArmy.Actions.html#error/2
 [with]: https://hexdocs.pm/elixir/Kernel.SpecialForms.html#with/1

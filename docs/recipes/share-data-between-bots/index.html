@@ -4,7 +4,6 @@
       <meta charset="UTF-8" />
       <title>Bot Army Cookbook - Share data between bots</title>
       <meta name="description" content="Tips, Tricks, and Recipes for Building Effective Bots" />
-      <script src="http://localhost:35729/livereload.js"></script>
       <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.7.0/styles/atom-one-dark.min.css" />
       <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/5.11.2/css/all.min.css" />
       <link rel="stylesheet" href="../../styles.css">
@@ -28,11 +27,11 @@ channel</a>). But what if you want bots to share information directly?</p>
 <p>First off, make sure there is a legitimate real-world scenario where actual users
 would share data outside of your system under test. For example, using email or
 social media to send invites to contacts (or strangers). If this still applies you
-can use <a href="https://git.corp.adobe.com/pages/BotTestingFramework/bot_army/BotArmy.SharedData.html#content"><code>BotArmy.SharedData</code></a> as a global mutable state accessible by
+can use <a href="https://hexdocs.pm/bot_army/1.0.0/BotArmy.SharedData.html"><code>BotArmy.SharedData</code></a> as a global mutable state accessible by
 all bots to <code>get</code>, <code>put</code> and <code>update</code> data.</p>
 <p>Be careful though, sharing data can cause all kinds of tricky concurrency problems
 (see below). I advise using <code>SharedData</code> sparingly!</p>
-<p>One exception is that it is OK to use <code>SharedData</code> to expose <a href="https://git.corp.adobe.com/pages/BotTestingFramework/bot_army/Mix.Tasks.Bots.LoadTest.html">run-time
+<p>One exception is that it is OK to use <code>SharedData</code> to expose <a href="https://hexdocs.pm/bot_army/1.0.0/Mix.Tasks.Bots.LoadTest.html">run-time
 configuration</a> to your bots.</p>
 <h2 id="accessing-custom-config"><a class="heading-anchor" href="#accessing-custom-config"><i class="fas fa-link"></i></a>Accessing custom config</h2>
 <p>The test runners automatically preload <code>SharedData</code> with your run-time configuration.

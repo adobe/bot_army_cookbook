@@ -5,7 +5,7 @@ Actions
 ## Intro
 
 Helpful approaches and snippets for working with the [bot
-army](https://git.corp.adobe.com/pages/BotTestingFramework/bot_army/readme.html).
+army](https://hexdocs.pm/bot_army/1.0.0/readme.html).
 
 This uses [Metalsmith](metalsmith.io) to build a static site.
 

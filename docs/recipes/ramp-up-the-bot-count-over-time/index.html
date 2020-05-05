@@ -4,7 +4,6 @@
       <meta charset="UTF-8" />
       <title>Bot Army Cookbook - Ramp up the bot count over time</title>
       <meta name="description" content="Tips, Tricks, and Recipes for Building Effective Bots" />
-      <script src="http://localhost:35729/livereload.js"></script>
       <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.7.0/styles/atom-one-dark.min.css" />
       <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/5.11.2/css/all.min.css" />
       <link rel="stylesheet" href="../../styles.css">
@@ -22,7 +21,7 @@
 
     <p>When running a load test, you might want to increase the load over time. Normally,
 this would be a feature of the test runner, but you can actually control it yourself
-with a clever use of <a href="https://git.corp.adobe.com/pages/BotTestingFramework/bot_army/BotArmy.Actions.html#wait/3"><code>BotArmy.Actions.wait</code></a>.</p>
+with a clever use of <a href="https://hexdocs.pm/bot_army/1.0.0/BotArmy.Actions.html#wait/3"><code>BotArmy.Actions.wait</code></a>.</p>
 <p>Simply start your tree with:</p>
 <pre><code class="hljs elixir"><span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">tree</span></span> <span class="hljs-keyword">do</span>
   Node.sequence([

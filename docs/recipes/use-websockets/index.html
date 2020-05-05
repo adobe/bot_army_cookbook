@@ -4,7 +4,6 @@
       <meta charset="UTF-8" />
       <title>Bot Army Cookbook - Use websockets</title>
       <meta name="description" content="Tips, Tricks, and Recipes for Building Effective Bots" />
-      <script src="http://localhost:35729/livereload.js"></script>
       <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.7.0/styles/atom-one-dark.min.css" />
       <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/5.11.2/css/all.min.css" />
       <link rel="stylesheet" href="../../styles.css">
@@ -42,7 +41,7 @@ continually runs through as one channel of control flow, and the stream of messa
 that arrive from websockets as a secondary channel that gets merged in.</p>
 <h2 id="extending-the-bot"><a class="heading-anchor" href="#extending-the-bot"><i class="fas fa-link"></i></a>Extending the bot</h2>
 <p>In order to handle this second channel, and to set up a websocket client in the first
-place, you will need to customize the bot. <a href="https://git.corp.adobe.com/pages/BotTestingFramework/bot_army/BotArmy.Bot.html#module-extending-the-bot"><code>BotArmy.Bot</code></a> gives you a way to do
+place, you will need to customize the bot. <a href="https://hexdocs.pm/bot_army/1.0.0/BotArmy.Bot.html#module-extending-the-bot"><code>BotArmy.Bot</code></a> gives you a way to do
 this.</p>
 <p>First, you have to set up a websocket client like <a href="https://hexdocs.pm/websockex/readme.html">websockex</a>. This library handles
 the low-level work of managing a websocket connection. It does this all in a new
@@ -117,14 +116,13 @@ functionality.</p>
 <span class="hljs-keyword">end</span>
 
 <span class="hljs-comment"># In MyBot.ex</span>
-<span class="hljs-comment"># Be sure to specify `--bot MyBot` when running the tests, see</span>
-<span class="hljs-comment"># https://git.corp.adobe.com/pages/BotTestingFramework/bot_army/Mix.Tasks.Bots.LoadTest.html#content</span>
+<span class="hljs-comment"># Be sure to specify this custom bot when running your test</span>
 
 <span class="hljs-class"><span class="hljs-keyword">defmodule</span> <span class="hljs-title">MyBot</span></span> <span class="hljs-keyword">do</span>
   <span class="hljs-variable">@moduledoc</span> <span class="hljs-string">&quot;&quot;</span><span class="hljs-string">&quot;
   Extended `BotArmy.Bot` to handle websockets.
 
-  See https://git.corp.adobe.com/pages/BotTestingFramework/bot_army/BotArmy.Bot.html#module-extending-the-bot
+  See https://hexdocs.pm/bot_army/1.0.0/BotArmy.Bot.html#module-extending-the-bot
   &quot;</span><span class="hljs-string">&quot;&quot;</span>
 
   <span class="hljs-comment"># You need this line to get all of the base `Bot` functionality</span>

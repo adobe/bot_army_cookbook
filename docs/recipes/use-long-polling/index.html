@@ -4,7 +4,6 @@
       <meta charset="UTF-8" />
       <title>Bot Army Cookbook - Use long-polling</title>
       <meta name="description" content="Tips, Tricks, and Recipes for Building Effective Bots" />
-      <script src="http://localhost:35729/livereload.js"></script>
       <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.7.0/styles/atom-one-dark.min.css" />
       <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/5.11.2/css/all.min.css" />
       <link rel="stylesheet" href="../../styles.css">
@@ -54,7 +53,7 @@ bot is actually a <a href="https://hexdocs.pm/elixir/GenServer.html"><code>GenSe
 update messages. The bot will process the message in between actions, giving you a
 chance to update the context.</p>
 <p>In order to handle the incoming message, you need to extend your bot with a custom
-<a href="https://git.corp.adobe.com/pages/BotTestingFramework/bot_army/BotArmy.Bot.html#module-extending-the-bot"><code>BotArmy.Bot</code></a>. Depending on how you set it up, you can also include logic to switch
+<a href="https://hexdocs.pm/bot_army/1.0.0/BotArmy.Bot.html#module-extending-the-bot"><code>BotArmy.Bot</code></a>. Depending on how you set it up, you can also include logic to switch
 between different feeds, as well as conditionally stop a specific feed. Here&apos;s an
 example:</p>
 <pre><code class="hljs elixir"><span class="hljs-comment"># In MyActions.ex</span>
@@ -102,14 +101,13 @@ Make sure to handle the update messages in a custom `BotArmy.Bot`.
 <span class="hljs-keyword">end</span>
 
 <span class="hljs-comment"># In MyBot.ex</span>
-<span class="hljs-comment"># Be sure to specify `--bot MyBot` when running the tests, see</span>
-<span class="hljs-comment"># https://git.corp.adobe.com/pages/BotTestingFramework/bot_army/Mix.Tasks.Bots.IntegrationTest.html#content</span>
+<span class="hljs-comment"># Be sure to specify this custom bot when running your test</span>
 
 <span class="hljs-class"><span class="hljs-keyword">defmodule</span> <span class="hljs-title">MyBot</span></span> <span class="hljs-keyword">do</span>
   <span class="hljs-variable">@moduledoc</span> <span class="hljs-string">&quot;&quot;</span><span class="hljs-string">&quot;
   Extended `BotArmy.Bot` to handle long-polling updates.
 
-  See https://git.corp.adobe.com/pages/BotTestingFramework/bot_army/BotArmy.Bot.html#module-extending-the-bot
+  See https://hexdocs.pm/bot_army/1.0.0/BotArmy.Bot.html#module-extending-the-bot
   &quot;</span><span class="hljs-string">&quot;&quot;</span>
 
   <span class="hljs-comment"># You need this line to get all of the base `Bot` functionality</span>

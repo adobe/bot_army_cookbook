@@ -4,7 +4,6 @@
       <meta charset="UTF-8" />
       <title>Bot Army Cookbook - Handle errors</title>
       <meta name="description" content="Tips, Tricks, and Recipes for Building Effective Bots" />
-      <script src="http://localhost:35729/livereload.js"></script>
       <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.7.0/styles/atom-one-dark.min.css" />
       <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/5.11.2/css/all.min.css" />
       <link rel="stylesheet" href="../../styles.css">
@@ -74,7 +73,7 @@ else
 <p>The simplest response to an error is to crash the bot. This happens automatically
 when an error is thrown. You can also crash the bot from an action by returning
 <code>{:error, &quot;Error reason...&quot;}</code>. Or you can do so from the tree with
-<a href="https://git.corp.adobe.com/pages/BotTestingFramework/bot_army/BotArmy.Actions.html#error/2"><code>BotArmy.Actions.error</code></a>.</p>
+<a href="https://hexdocs.pm/bot_army/1.0.0/BotArmy.Actions.html#error/2"><code>BotArmy.Actions.error</code></a>.</p>
 <p>Crashing a bot isn&apos;t always the best option. One main benefit of behavior trees is
 the ability to respond to feedback and try a different action. For this reason, you
 should almost always return <code>:fail</code> instead of <code>{:error, reason}</code> in your actions.

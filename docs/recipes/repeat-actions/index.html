@@ -4,7 +4,6 @@
       <meta charset="UTF-8" />
       <title>Bot Army Cookbook - Repeat actions</title>
       <meta name="description" content="Tips, Tricks, and Recipes for Building Effective Bots" />
-      <script src="http://localhost:35729/livereload.js"></script>
       <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.7.0/styles/atom-one-dark.min.css" />
       <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/5.11.2/css/all.min.css" />
       <link rel="stylesheet" href="../../styles.css">
@@ -44,7 +43,7 @@ repeating.</p>
 tree to repeat.</p>
 <h2 id="using-the-repeat_n-node"><a class="heading-anchor" href="#using-the-repeat_n-node"><i class="fas fa-link"></i></a>Using the <code>repeat_n</code> node</h2>
 <p>You can nest any action or subtree under the <a href="https://hexdocs.pm/behavior_tree/BehaviorTree.Node.html#repeat_n/2"><code>repeat_n</code> node</a>, and it will be
-repeated the specified number of times, regardless of its outcome. Note the <a href="https://git.corp.adobe.com/pages/BotTestingFramework/bot_army/BotArmy.Actions.html#done/1">done
+repeated the specified number of times, regardless of its outcome. Note the <a href="https://hexdocs.pm/bot_army/1.0.0/BotArmy.Actions.html#done/1">done
 action</a> to stop the bot.</p>
 <pre><code class="hljs elixir"><span class="hljs-comment"># logs in, then makes 5 posts, then stops</span>
 <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">tree</span></span> <span class="hljs-keyword">do</span>

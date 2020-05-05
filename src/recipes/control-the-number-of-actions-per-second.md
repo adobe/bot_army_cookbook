@@ -29,4 +29,4 @@ is to use the [`BotArmy.Actions.wait`][1] action in your tree. You can supply th
 time to wait (in _seconds_). There is also a version that waits for a random time
 between two bounds.
 
-[1]: https://git.corp.adobe.com/pages/BotTestingFramework/bot_army/BotArmy.Actions.html#wait/2
+[1]: https://hexdocs.pm/bot_army/1.0.0/BotArmy.Actions.html#wait/2

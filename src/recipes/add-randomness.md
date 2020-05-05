@@ -205,4 +205,4 @@ the random generator is doing the same thing.
 [default parameters]: ../set-default-values/
 [`node.random`]: https://hexdocs.pm/behavior_tree/BehaviorTree.Node.html#random/1
 [`node.random_weighted`]: https://hexdocs.pm/behavior_tree/BehaviorTree.Node.html#random_weighted/1
-[succeed_rate]: https://git.corp.adobe.com/pages/BotTestingFramework/bot_army/BotArmy.Actions.html#succeed_rate/2
+[succeed_rate]: https://hexdocs.pm/bot_army/1.0.0/BotArmy.Actions.html#succeed_rate/2

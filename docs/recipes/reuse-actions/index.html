@@ -4,7 +4,6 @@
       <meta charset="UTF-8" />
       <title>Bot Army Cookbook - Reuse actions</title>
       <meta name="description" content="Tips, Tricks, and Recipes for Building Effective Bots" />
-      <script src="http://localhost:35729/livereload.js"></script>
       <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.7.0/styles/atom-one-dark.min.css" />
       <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/5.11.2/css/all.min.css" />
       <link rel="stylesheet" href="../../styles.css">
@@ -39,7 +38,7 @@ makes sense, but the problem is that if your action errors, the bot will die
 immediately. You might want to use the action in a different way where you have a
 fallback action if it doesn&apos;t work, but you won&apos;t be able to if the first one errors.</p>
 <p>It is better to always <code>:fail</code>. You can always wrap it in a <code>Node.select</code> and follow
-it with <a href="https://git.corp.adobe.com/pages/BotTestingFramework/bot_army/BotArmy.Actions.html#error/2"><code>BotArmy.Action.error</code></a>. This way you can decide if the bot should
+it with <a href="https://hexdocs.pm/bot_army/1.0.0/BotArmy.Actions.html#error/2"><code>BotArmy.Action.error</code></a>. This way you can decide if the bot should
 die
 at the tree level, instead of the action level.</p>
 <h2 id="be-careful-about-side-effects"><a class="heading-anchor" href="#be-careful-about-side-effects"><i class="fas fa-link"></i></a>Be careful about side effects</h2>

@@ -44,7 +44,7 @@ latency, but your server logs are probably more useful. If you include a `sessio
 in your bot logs and your server, you can connect the logs in your aggregator for a
 complete picture.
 
-[lnav tips]: https://git.corp.adobe.com/pages/BotTestingFramework/bot_army/readme.html#logging
-[custom logging]: https://git.corp.adobe.com/pages/BotTestingFramework/bot_army/BotArmy.Bot.html#c:log_action_outcome/3
+[lnav tips]: https://hexdocs.pm/bot_army/1.0.0/readme.html#logging
+[custom logging]: https://hexdocs.pm/bot_army/1.0.0/BotArmy.Bot.html#c:log_action_outcome/3
 [logger]: https://hexdocs.pm/logger/Logger.html#content
-[log action]: https://git.corp.adobe.com/pages/BotTestingFramework/bot_army/BotArmy.Actions.html#log/2
+[log action]: https://hexdocs.pm/bot_army/1.0.0/BotArmy.Actions.html#log/2

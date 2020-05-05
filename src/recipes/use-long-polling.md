@@ -98,14 +98,13 @@ def start_long_polling(%{active_feed_id: feed_id}) when is_binary(feed_id) do
 end
 
 # In MyBot.ex
-# Be sure to specify `--bot MyBot` when running the tests, see
-# https://git.corp.adobe.com/pages/BotTestingFramework/bot_army/Mix.Tasks.Bots.IntegrationTest.html#content
+# Be sure to specify this custom bot when running your test
 
 defmodule MyBot do
   @moduledoc """
   Extended `BotArmy.Bot` to handle long-polling updates.
 
-  See https://git.corp.adobe.com/pages/BotTestingFramework/bot_army/BotArmy.Bot.html#module-extending-the-bot
+  See https://hexdocs.pm/bot_army/1.0.0/BotArmy.Bot.html#module-extending-the-bot
   """
 
   # You need this line to get all of the base `Bot` functionality
@@ -140,4 +139,4 @@ end
 [separate process]: https://elixir-lang.org/getting-started/processes.html
 [`genserver`]: https://hexdocs.pm/elixir/GenServer.html
 [`call`]: https://hexdocs.pm/elixir/GenServer.html#call/3
-[`botarmy.bot`]: https://git.corp.adobe.com/pages/BotTestingFramework/bot_army/BotArmy.Bot.html#module-extending-the-bot
+[`botarmy.bot`]: https://hexdocs.pm/bot_army/1.0.0/BotArmy.Bot.html#module-extending-the-bot

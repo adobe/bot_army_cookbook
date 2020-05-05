@@ -53,5 +53,5 @@ different trees, but also across both load and integration tests, which is a ver
 powerful feature.
 
 [logic]: ../conditionally-run-actions/
-[error]: https://git.corp.adobe.com/pages/BotTestingFramework/bot_army/BotArmy.Actions.html#error/2
+[error]: https://hexdocs.pm/bot_army/1.0.0/BotArmy.Actions.html#error/2
 [flexible]: ../parameterize-actions/

@@ -4,7 +4,6 @@
       <meta charset="UTF-8" />
       <title>Bot Army Cookbook - Add randomness</title>
       <meta name="description" content="Tips, Tricks, and Recipes for Building Effective Bots" />
-      <script src="http://localhost:35729/livereload.js"></script>
       <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.7.0/styles/atom-one-dark.min.css" />
       <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/5.11.2/css/all.min.css" />
       <link rel="stylesheet" href="../../styles.css">
@@ -101,7 +100,7 @@ subtrees to check for required conditions, and you can make each subtree loop fo
 while before bouncing back up.</p>
 <p>In order to make each subtree repeat, you could use a fixed number in
 <code>Node.repeat_n</code>, or you could supply a random n as noted above. You can also use
-<a href="https://git.corp.adobe.com/pages/BotTestingFramework/bot_army/BotArmy.Actions.html#succeed_rate/2"><code>BotArmy.Actions.succeed_rate</code></a> to randomize the chance to loop again.
+<a href="https://hexdocs.pm/bot_army/1.0.0/BotArmy.Actions.html#succeed_rate/2"><code>BotArmy.Actions.succeed_rate</code></a> to randomize the chance to loop again.
 For example, a succeed rate of 0.75 would &quot;choose&quot; to loop three out of four times on
 average. This might seem unintuitive, especially if you are trying to control the
 number of loops. It helps to think of it as looking at a real user who has just

@@ -111,14 +111,13 @@ defmodule MyWebSocket do
 end
 
 # In MyBot.ex
-# Be sure to specify `--bot MyBot` when running the tests, see
-# https://git.corp.adobe.com/pages/BotTestingFramework/bot_army/Mix.Tasks.Bots.LoadTest.html#content
+# Be sure to specify this custom bot when running your test
 
 defmodule MyBot do
   @moduledoc """
   Extended `BotArmy.Bot` to handle websockets.
 
-  See https://git.corp.adobe.com/pages/BotTestingFramework/bot_army/BotArmy.Bot.html#module-extending-the-bot
+  See https://hexdocs.pm/bot_army/1.0.0/BotArmy.Bot.html#module-extending-the-bot
   """
 
   # You need this line to get all of the base `Bot` functionality
@@ -161,7 +160,7 @@ delayed in handling any received websocket messages.
 [canary release]: https://martinfowler.com/bliki/CanaryRelease.html
 [long-polling]: ../use-long-polling/
 [process]: https://elixir-lang.org/getting-started/processes.html
-[`botarmy.bot`]: https://git.corp.adobe.com/pages/BotTestingFramework/bot_army/BotArmy.Bot.html#module-extending-the-bot
+[`botarmy.bot`]: https://hexdocs.pm/bot_army/1.0.0/BotArmy.Bot.html#module-extending-the-bot
 [websockex]: https://hexdocs.pm/websockex/readme.html
 [`genserver`]: https://hexdocs.pm/elixir/GenServer.html
 [`handle_call`]: https://hexdocs.pm/elixir/GenServer.html#c:handle_call/3
