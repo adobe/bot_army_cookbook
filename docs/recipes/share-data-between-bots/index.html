@@ -59,9 +59,7 @@ Here is an example:</p>
 <p>Let&apos;s say you want to make a test where each bot will look in <code>SharedData</code> for an
 album invite to join, and if it doesn&apos;t find one, it will create an album and put the
 invite in <code>SharedData</code> for the other bots to use.</p>
-<p>Or as a small, yet significant variant, maybe you have a test where one bot creates
-an album, puts the invite id in <code>SharedData</code>, and then another bot joins it.</p>
-<p>These sound like very reasonable test cases. But beware, here be dragons!</p>
+<p>This sounds like very reasonable test cases. But beware, here be dragons!</p>
 <p>The problem is that as soon as you have multiple bots, running at the same time,
 trying to access the same shared resource, you have opened the box to all the
 concurrency challenges, such as race conditions and consistency issues.</p>
@@ -91,9 +89,12 @@ bottleneck that all bots must pass through, which can cause problems.</p>
 <p>The easiest fix I&apos;ve come up with so far is to offset the bots so that you don&apos;t run
 into a situation where multiple bots are checking <code>SharedData</code> before it has a chance
 to get populated. You can do this by staggering the bot <a href="../ramp-up-the-bot-count-over-time">start up times</a>, but that
-won&apos;t grantee fixing the problem. You could also ensure only a single bot makes the
-albums, while the others wait. If you are doing integration testing, use a <code>pre</code> tree
-for that. Otherwise, you can do something like this:</p>
+won&apos;t grantee fixing the problem.</p>
+<p>Also, as a small, yet significant variant, maybe you want one bot to create an album
+and put the invite id in <code>SharedData</code>, and then another bot to join it. In this
+example, you have the problem of <a href="../wait-for-another-bot-to-finish-an-action">making one bot wait for another</a>. That is a
+full topic on its own, so see the linked post for full details, though a useful trick
+is relying on the fact that each bot has a unique id:</p>
 <pre><code class="hljs elixir"><span class="hljs-comment"># in your tree</span>
 ...
 Node.sequence([
@@ -109,12 +110,31 @@ Node.sequence([
 <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">check_bot_id</span></span>(%{<span class="hljs-symbol">id:</span> id}, allowed) <span class="hljs-keyword">when</span> id == allowed, <span class="hljs-symbol">do:</span> <span class="hljs-symbol">:succeed</span>
 <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">check_bot_id</span></span>(), <span class="hljs-symbol">do:</span> <span class="hljs-symbol">:fail</span></code></pre>
 
-<p>In the second example, you have the problem of <a href="../wait-for-another-bot-to-finish-an-action">making one bot wait for
-another</a>. That is a full topic on its own, so see the linked post for full
-details.</p>
-<p>To reiterate, try to avoid using <code>SharedData</code> as much as possible aside from
-accessing config. Keep race conditions in mind by thinking about how many bots will
-be accessing <code>SharedData</code> at the same time.</p>
+<h2 id="using-locks"><a class="heading-anchor" href="#using-locks"><i class="fas fa-link"></i></a>Using locks</h2>
+<p>If you really want to use locking, you can, but it involves reaching through the
+abstraction that <code>SharedData</code> exposes. Currently, <code>SharedData</code> wraps
+<a href="https://github.com/sasa1977/con_cache"><code>ConCache</code></a>, so you can use the locking tools exposed there. For example,
+here is how you could supply a list of email addresses in your <code>SharedData</code> config,
+and deal them out to each bot:</p>
+<pre><code class="hljs elixir"><span class="hljs-comment"># in your action</span>
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">get_email_from_shared_data</span></span>(context) <span class="hljs-keyword">do</span>
+  <span class="hljs-comment"># Concache.isolated locks the :users row until the function exits</span>
+  <span class="hljs-comment"># (Similar to a transaction).</span>
+  <span class="hljs-comment"># :bot_shared_data is the hard-coded name for the ConcCache process</span>
+  user_name =
+    ConCache.isolated(<span class="hljs-symbol">:bot_shared_data</span>, <span class="hljs-symbol">:users</span>, <span class="hljs-keyword">fn</span> -&gt;
+      [user | temp_list] = BotArmy.SharedData.get(<span class="hljs-symbol">:users</span>)
+      BotArmy.SharedData.put(<span class="hljs-symbol">:users</span>, temp_list)
+      user
+    <span class="hljs-keyword">end</span>)
+  {<span class="hljs-symbol">:succeed</span>, [<span class="hljs-symbol">user_name:</span> user_name]}
+<span class="hljs-keyword">end</span></code></pre>
+
+<p>This can be very handy, but be aware that it relies on information that technically
+should be non-public. Perhaps a future version of <code>SharedData</code> will expose this
+ability. Also note that if you attempt to do something time consuming inside of the
+isolated function (like hit an auth endpoint over http), you will create a bottleneck
+and your bots will probably time out.</p>
 
 
         <footer>

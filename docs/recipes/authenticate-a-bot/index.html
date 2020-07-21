@@ -100,6 +100,8 @@ Stores the received token in the context.
   {<span class="hljs-symbol">:succeed</span>, <span class="hljs-symbol">token:</span> token, <span class="hljs-symbol">username:</span> username}
 <span class="hljs-keyword">end</span></code></pre>
 
+<p>If you need to use credentials that cannot be enumerated as in the example above,
+take a look at the approach of using <a href="../share-data-between-bots/#using-locks">SharedData</a>.</p>
 <h2 id="authorizing-actions-after-having-logged-in"><a class="heading-anchor" href="#authorizing-actions-after-having-logged-in"><i class="fas fa-link"></i></a>Authorizing actions after having logged in</h2>
 <p>Usually you receive some kind of session token after authenticating. You&apos;ll need to
 hold on to this token in the <code>context</code> for subsequent actions to use when making

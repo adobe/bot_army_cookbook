@@ -54,10 +54,7 @@ Let's say you want to make a test where each bot will look in `SharedData` for a
 album invite to join, and if it doesn't find one, it will create an album and put the
 invite in `SharedData` for the other bots to use.
 
-Or as a small, yet significant variant, maybe you have a test where one bot creates
-an album, puts the invite id in `SharedData`, and then another bot joins it.
-
-These sound like very reasonable test cases. But beware, here be dragons!
+This sounds like very reasonable test cases. But beware, here be dragons!
 
 The problem is that as soon as you have multiple bots, running at the same time,
 trying to access the same shared resource, you have opened the box to all the
@@ -95,9 +92,13 @@ bottleneck that all bots must pass through, which can cause problems.
 The easiest fix I've come up with so far is to offset the bots so that you don't run
 into a situation where multiple bots are checking `SharedData` before it has a chance
 to get populated. You can do this by staggering the bot [start up times], but that
-won't grantee fixing the problem. You could also ensure only a single bot makes the
-albums, while the others wait. If you are doing integration testing, use a `pre` tree
-for that. Otherwise, you can do something like this:
+won't grantee fixing the problem.
+
+Also, as a small, yet significant variant, maybe you want one bot to create an album
+and put the invite id in `SharedData`, and then another bot to join it. In this
+example, you have the problem of [making one bot wait for another][wait]. That is a
+full topic on its own, so see the linked post for full details, though a useful trick
+is relying on the fact that each bot has a unique id:
 
 ```elixir
 # in your tree
@@ -116,16 +117,39 @@ def check_bot_id(%{id: id}, allowed) when id == allowed, do: :succeed
 def check_bot_id(), do: :fail
 ```
 
-In the second example, you have the problem of [making one bot wait for
-another][wait]. That is a full topic on its own, so see the linked post for full
-details.
+## Using locks
 
-To reiterate, try to avoid using `SharedData` as much as possible aside from
-accessing config. Keep race conditions in mind by thinking about how many bots will
-be accessing `SharedData` at the same time.
+If you really want to use locking, you can, but it involves reaching through the
+abstraction that `SharedData` exposes. Currently, `SharedData` wraps
+[`ConCache`][concache], so you can use the locking tools exposed there. For example,
+here is how you could supply a list of email addresses in your `SharedData` config,
+and deal them out to each bot:
+
+```elixir
+# in your action
+def get_email_from_shared_data(context) do
+  # Concache.isolated locks the :users row until the function exits
+  # (Similar to a transaction).
+  # :bot_shared_data is the hard-coded name for the ConcCache process
+  user_name =
+    ConCache.isolated(:bot_shared_data, :users, fn ->
+      [user | temp_list] = BotArmy.SharedData.get(:users)
+      BotArmy.SharedData.put(:users, temp_list)
+      user
+    end)
+  {:succeed, [user_name: user_name]}
+end
+```
+
+This can be very handy, but be aware that it relies on information that technically
+should be non-public. Perhaps a future version of `SharedData` will expose this
+ability. Also note that if you attempt to do something time consuming inside of the
+isolated function (like hit an auth endpoint over http), you will create a bottleneck
+and your bots will probably time out.
 
 [sync]: ../use-websockets
 [shared data]: https://hexdocs.pm/bot_army/1.0.0/BotArmy.SharedData.html
 [config]: https://hexdocs.pm/bot_army/1.0.0/Mix.Tasks.Bots.LoadTest.html
 [wait]: ../wait-for-another-bot-to-finish-an-action
 [start up times]: ../ramp-up-the-bot-count-over-time
+[concache]: https://github.com/sasa1977/con_cache

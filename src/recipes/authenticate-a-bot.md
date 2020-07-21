@@ -95,6 +95,9 @@ def log_in(
 end
 ```
 
+If you need to use credentials that cannot be enumerated as in the example above,
+take a look at the approach of using [SharedData].
+
 ## Authorizing actions after having logged in
 
 Usually you receive some kind of session token after authenticating. You'll need to
@@ -105,3 +108,5 @@ One last thought - an alternative to having a pool of users is having a pool of
 tokens to draw from. You would need some separate service that took care of logging
 in and obtaining tokens and making them available, but it would let you avoid having
 an authentication step in your tests.
+
+[shareddata]: ../share-data-between-bots/#using-locks
